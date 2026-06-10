@@ -1,0 +1,55 @@
+
+Lookup:Location
+0xC0=the Debug Menu
+0x3A=the Tutorial
+0x0B=Stage 1-1
+0x0E=Stage 1-2
+0x0F=Stage 1-3
+0x12=Stage 2-1
+0x14=Stage 2-2
+0x17=Stage 2-3
+0x19=Stage 3-1
+0x1C=Stage 3-2
+0x1E=Stage 3-3
+0x23=Stage 4-1
+0x25=Stage 4-2
+0x20=Stage 4-3
+0x27=Stage 5-1
+0x2A=Stage 5-2
+0x2C=Stage 5-3
+
+Lookup:Area
+0x0B=Downtown
+0x0E=Downtown
+0x0F=Downtown
+0x12=Underground
+0x14=in the Old Sewer Tunnel
+0x17=in the Old Sewer Tunnel
+0x19=on the New York Bridge
+0x1C=on the New York Bridge
+0x1E=on the New York Bridge
+0x23=in the Docks
+0x25=in the Docks
+0x20=on the Medusa Temple
+0x27=in the Dungeon
+0x2A=in the Dungeon
+0x2C=in the Dungeon
+
+Display:
+?0xH0019d0=55_0xH006cf0=0?Jake is fighting the Huntsgirl 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=55_0xH006cf0=1?Jake is fighting the Huntsgirl 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=54_0xH006cf0=0?Jake is fighting the Giant Spider 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=54_0xH006cf0=1?Jake is fighting the Giant Spider 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=48_0xH006cf0=0?Jake is fighting the Cyclops 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=48_0xH006cf0=1?Jake is fighting the Cyclops 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=53_0xH006cf0=0?Jake is fighting the Medusa 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=53_0xH006cf0=1?Jake is fighting the Medusa 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=56_0xH006cf0=0?Jake is rematching the Huntsgirl 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=56_0xH006cf0=1?Jake is rematching the Huntsgirl 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=46_0xH006cf0=0?Jake is fighting the Huntsclan Clones 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=46_0xH006cf0=1?Jake is fighting the Huntsclan Clones 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH0019d0=50_0xH006cf0=0?Jake is fighting the Huntsman 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH0019d0=50_0xH006cf0=1?Jake is fighting the Huntsman 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+?0xH006cf0=0_0xH0019d0>=0S0xH0019d0=11S0xH0019d0=14S0xH0019d0=15S0xH0019d0=18S0xH0019d0=20S0xH0019d0=23S0xH0019d0=25S0xH0019d0=28S0xH0019d0=30S0xH0019d0=35S0xH0019d0=37S0xH0019d0=32S0xH0019d0=39S0xH0019d0=42S0xH0019d0=44?Jake is currently @Area(0xh0019d0) [@Location(0xh0019d0)] 👦🏻⚔️ @Number(0xh007688)/3 | 👦🏻🛹 @Number(0xh00765c)/3 | 👦🏻👟 @Number(0xh007660)/3 | 👦🏻❤️ @Number(0xh007684)/3 | 👦🏻🎯 @Number(0xh00768c)/3
+?0xH006cf0=1_0xH0019d0>=0S0xH0019d0=11S0xH0019d0=14S0xH0019d0=15S0xH0019d0=18S0xH0019d0=20S0xH0019d0=23S0xH0019d0=25S0xH0019d0=28S0xH0019d0=30S0xH0019d0=35S0xH0019d0=37S0xH0019d0=32S0xH0019d0=39S0xH0019d0=42S0xH0019d0=44?Jake is currently @Area(0xh0019d0) [@Location(0xh0019d0)] 🐲🌀 @Number(0xh00766c)/3 | 🐲🔥 @Number(0xh00767c)/3 | 🐲⚡ @Number(0xh007670)/3 | 🐲💨 @Number(0xh007690)/3 | 🐲⚔️ @Number(0xh007658)/3
+Not currently in a stage

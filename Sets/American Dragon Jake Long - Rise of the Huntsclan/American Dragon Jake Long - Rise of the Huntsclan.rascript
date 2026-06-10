@@ -1,0 +1,481 @@
+// American Dragon: Jake Long - Rise of the Huntsclan
+// #ID = 9405
+
+// Memory accessors
+function ScreenId() => byte(0x0019D0)
+function ScreenMirror() => byte(0x00373C)
+function PlayerForm() => byte(0x006CF0)
+function isOnSkateboard() => byte(0x007014)
+function HudVisible() => byte(0x006B50)
+function PauseState() => byte(0x001FBD)
+function VictoryPose() => byte(0x007674)
+function CameraLock() => byte(0x0074F0)
+function StageTimerLow() => word(0x0062B4)
+function StageTimerHigh() => word(0x0062B6)
+
+// Screen IDs
+SCREEN_BOOT = 0xC8
+SCREEN_NON_STAGE = 0xC9
+SCREEN_DEBUG = 0xC0
+SCREEN_TUTORIAL = 0x3A
+
+// Regular stage IDs
+STAGE_1_1 = 0x0B
+STAGE_1_2 = 0x0E
+STAGE_1_3 = 0x0F
+STAGE_2_1 = 0x12
+STAGE_2_2 = 0x14
+STAGE_2_3 = 0x17
+STAGE_3_1 = 0x19
+STAGE_3_2 = 0x1C
+STAGE_3_3 = 0x1E
+STAGE_4_1 = 0x23
+STAGE_4_2 = 0x25
+STAGE_4_3 = 0x20
+STAGE_5_1 = 0x27
+STAGE_5_2 = 0x2A
+STAGE_5_3 = 0x2C
+
+// Boss stage IDs
+BOSS_HUNTSGIRL = 0x37
+BOSS_GIANT_SPIDER = 0x36
+BOSS_CYCLOPS = 0x30
+BOSS_MEDUSA = 0x35
+BOSS_HUNTSGIRL_REMATCH = 0x38
+BOSS_HUNTSCLAN_CLONES = 0x2E
+BOSS_HUNTSMAN = 0x32
+
+// Jake Positions
+FORM_JAKE = 0
+FORM_DRAGON = 1
+VICTORY_POSE_ACTIVE = 2
+ON_SKATEBOARD = 2
+ON_SKATEBOARD_AIRBORNE = 3
+
+RegularStageIds = [
+    STAGE_1_1, STAGE_1_2, STAGE_1_3,
+    STAGE_2_1, STAGE_2_2, STAGE_2_3,
+    STAGE_3_1, STAGE_3_2, STAGE_3_3,
+    STAGE_4_1, STAGE_4_2, STAGE_4_3,
+    STAGE_5_1, STAGE_5_2, STAGE_5_3
+]
+
+BossStageIds = [
+    BOSS_HUNTSGIRL,
+    BOSS_GIANT_SPIDER,
+    BOSS_CYCLOPS,
+    BOSS_MEDUSA,
+    BOSS_HUNTSGIRL_REMATCH,
+    BOSS_HUNTSCLAN_CLONES,
+    BOSS_HUNTSMAN
+]
+
+PlayableScreenIds = [
+    STAGE_1_1, STAGE_1_2, STAGE_1_3,
+    STAGE_2_1, STAGE_2_2, STAGE_2_3,
+    STAGE_3_1, STAGE_3_2, STAGE_3_3,
+    STAGE_4_1, STAGE_4_2, STAGE_4_3,
+    STAGE_5_1, STAGE_5_2, STAGE_5_3,
+    BOSS_HUNTSGIRL,
+    BOSS_GIANT_SPIDER,
+    BOSS_CYCLOPS,
+    BOSS_MEDUSA,
+    BOSS_HUNTSGIRL_REMATCH,
+    BOSS_HUNTSCLAN_CLONES,
+    BOSS_HUNTSMAN
+]
+
+// SCREEN HELPER
+function IsScreen(screen) => ScreenId() == screen
+function WasScreen(screen) => prev(ScreenId()) == screen
+
+// PLAYER FORM HELPER
+function IsJakeForm() => PlayerForm() == FORM_JAKE
+function IsDragonForm() => PlayerForm() == FORM_DRAGON
+function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
+function IsInStage(stage) => IsScreen(stage)
+function LeftStage(stage) => WasScreen(stage) && ScreenId() != stage
+
+function TookDamage() => JakeHealth() < 74
+function IsSkateboarding() => isOnSkateboard() == ON_SKATEBOARD || isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
+
+//HUNTSGIRL BOSS FIGHT HELPER
+function HuntsgirlFullHP() => byte(0x041802) == 20
+function HuntsgirlDefeated() => byte(0x041802) == 0
+function JakeHealth() => byte(0x007026)
+function JakeIsFullHealth() => byte(0x007026) == 74
+function HuntsgirlHp() => byte(0x041802)
+function HuntsgirlDefeatedDelta() => HuntsgirlHp() == 0 && prev(HuntsgirlHp()) > 0
+
+//GIANT SPIDER BOSS FIGHT HELPER
+function GiantSpiderFullHP() => byte(0x041b0e) == 80
+function GiantSpiderDefeated() => byte(0x041b0e) == 0
+function JakeHealth() => byte(0x007026)
+function JakeIsFullHealth() => byte(0x007026) == 74
+function GiantSpiderHp() => byte(0x041b0e)
+function GiantSpiderDefeatedDelta() => GiantSpiderHp() == 0 && prev(GiantSpiderHp()) > 0
+
+//CYCLOPS BOSS FIGHT HELPER
+function CyclopsFullHP() => byte(0x041b0a) == 22
+function CyclopsDefeated() => byte(0x041b0a) == 0
+function JakeHealth() => byte(0x007026)
+function JakeIsFullHealth() => byte(0x007026) == 74
+function CyclopsHp() => byte(0x041b0a)
+function CyclopsDefeatedDelta() => CyclopsHp() == 0 && prev(CyclopsHp()) > 0
+
+ 
+//Check if Player was in a Specific stage before, if its not the same ID anymore and if the Victory Pose was active
+function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
+
+// TIMER HELPER
+function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
+
+
+
+//WORLD 1 ACHIEVEMENTS
+
+achievement(
+    title = "Skate Through the Streets",
+    description = "Clear Stage 1-1 through the streets of New York City",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_1_1)
+)
+
+achievement(
+    title = "Fire Escape Chase",
+    description = "Clear Stage 1-2 and take the fight up the fire escapes",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_1_2)
+)
+
+achievement(
+    title = "Rooftop Pursuit",
+    description = "Clear Stage 1-3 across the rooftops",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_1_3)
+)
+
+achievement(
+    title = "Rooftop Date",
+    description = "Defeat the Huntsgirl and complete World 1",
+    points = 10,
+    type = "progression",
+    trigger = StageClearCandidate(BOSS_HUNTSGIRL)
+)
+
+
+achievement(
+    title = "Love at First Fight",
+    description = "Defeat the Huntsgirl without taking damage",
+    points = 25,
+    type = "missable",
+    trigger = IsScreen(BOSS_HUNTSGIRL) &&
+              once(HuntsgirlFullHP()) &&
+              never(TookDamage()) &&
+              trigger_when(HuntsgirlDefeatedDelta())
+)
+
+
+//WORLD 2 ACHIEVEMENTS
+
+achievement(
+    title = "Into the Sewers",
+    description = "Clear Stage 2-1 and descend into the sewers",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_2_1)
+)
+
+achievement(
+    title = "Down, Down, Down",
+    description = "Clear Stage 2-2 deeper underground",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_2_2)
+)
+
+achievement(
+    title = "Elevator Shaft Scramble",
+    description = "Clear Stage 2-3 through the sewer elevator shafts",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_2_3)
+)
+
+achievement(
+    title = "Web of Trouble",
+    description = "Defeat the Giant Spider and complete World 2",
+    points = 10,
+    type = "progression",
+    trigger = StageClearCandidate(BOSS_GIANT_SPIDER)
+)
+
+achievement(
+    title = "No Board, No Bites",
+    description = "Defeat the Giant Spider without using the skateboard and without taking damage",
+    points = 25,
+    type = "missable",
+    trigger = IsScreen(BOSS_GIANT_SPIDER) &&
+              once(GiantSpiderFullHP()) &&
+              never(TookDamage()) &&
+              never(IsSkateboarding()) &&
+              trigger_when(GiantSpiderDefeatedDelta())
+)
+
+
+//WORLD 3 ACHIEVEMENTS
+
+achievement(
+    title = "Bridge Out",
+    description = "Clear Stage 3-1 and reach the New York bridge",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_3_1)
+)
+
+achievement(
+    title = "Rush-Hour Dragon",
+    description = "Clear Stage 3-2 through the traffic",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_3_2)
+)
+
+achievement(
+    title = "Helicopter Hazard",
+    description = "Clear Stage 3-3 past the helicopter pursuit",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_3_3)
+)
+
+achievement(
+    title = "Eye on the Bridge",
+    description = "Defeat the Cyclops and complete World 3",
+    points = 10,
+    type = "progression",
+    trigger = StageClearCandidate(BOSS_CYCLOPS)
+)
+
+CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
+
+achievement(
+    title = "MY EYE!!!",
+    description = "Defeat the Cyclops in under 2 minutes",
+    points = 25,
+    type = "missable",
+    trigger = IsScreen(BOSS_CYCLOPS) &&
+              once(CyclopsFullHP()) &&
+              never(TookDamage()) &&
+              never(StageTimer() >= CYCLOPS_TIME_LIMIT) &&
+              trigger_when(CyclopsDefeatedDelta() && StageTimer() < CYCLOPS_TIME_LIMIT)
+)
+
+//RICH PRESENCE//
+
+StageNameLookup = {
+    0xC0: "the Debug Menu",
+    0x3A: "the Tutorial",
+    0x0B: "Stage 1-1",
+    0x0E: "Stage 1-2",
+    0x0F: "Stage 1-3",
+    0x37: "the Huntsgirl boss fight",
+    0x12: "Stage 2-1",
+    0x14: "Stage 2-2",
+    0x17: "Stage 2-3",
+    0x36: "the Giant Spider boss fight",
+    0x19: "Stage 3-1",
+    0x1C: "Stage 3-2",
+    0x1E: "Stage 3-3",
+    0x30: "the Cyclops boss fight",
+    0x23: "Stage 4-1",
+    0x25: "Stage 4-2",
+    0x20: "Stage 4-3",
+    0x35: "the Medusa boss fight",
+    0x27: "Stage 5-1",
+    0x2A: "Stage 5-2",
+    0x2C: "Stage 5-3",
+    0x38: "the Huntsgirl rematch",
+    0x2E: "the Huntsclan Clones boss fight",
+    0x32: "the Huntsman final boss fight",
+}
+
+StageAreaLookup = {
+    0x0B: "Downtown",
+    0x0E: "Downtown",
+    0x0F: "Downtown",
+    0x12: "Underground",
+    0x14: "in the Old Sewer Tunnel",
+    0x17: "in the Old Sewer Tunnel",
+    0x19: "on the New York Bridge",
+    0x1C: "on the New York Bridge",
+    0x1E: "on the New York Bridge",
+    0x23: "in the Docks",
+    0x25: "in the Docks",
+    0x20: "on the Medusa Temple",
+    0x27: "in the Dungeon",
+    0x2A: "in the Dungeon",
+    0x2C: "in the Dungeon",
+}
+
+
+LocationLookup = StageNameLookup
+AreaLookup = StageAreaLookup
+
+rich_presence_conditional_display(byte(0x0019D0) == 55 && byte(0x006CF0) == 0, "Jake is fighting the Huntsgirl 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 55 && byte(0x006CF0) == 1, "Jake is fighting the Huntsgirl 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 54 && byte(0x006CF0) == 0, "Jake is fighting the Giant Spider 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 54 && byte(0x006CF0) == 1, "Jake is fighting the Giant Spider 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 48 && byte(0x006CF0) == 0, "Jake is fighting the Cyclops 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 48 && byte(0x006CF0) == 1, "Jake is fighting the Cyclops 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 53 && byte(0x006CF0) == 0, "Jake is fighting the Medusa 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 53 && byte(0x006CF0) == 1, "Jake is fighting the Medusa 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 56 && byte(0x006CF0) == 0, "Jake is rematching the Huntsgirl 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 56 && byte(0x006CF0) == 1, "Jake is rematching the Huntsgirl 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 46 && byte(0x006CF0) == 0, "Jake is fighting the Huntsclan 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 46 && byte(0x006CF0) == 1, "Jake is fighting the Huntsclan 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 50 && byte(0x006CF0) == 0, "Jake is fighting the Huntsman 👦🏻⚔️ {0}/3 | 👦🏻🛹 {1}/3 | 👦🏻👟 {2}/3 | 👦🏻❤️ {3}/3 | 👦🏻🎯 {4}/3",
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x0019D0) == 50 && byte(0x006CF0) == 1, "Jake is fighting the Huntsman 🐲🌀 {0}/3 | 🐲🔥 {1}/3 | 🐲⚡ {2}/3 | 🐲💨 {3}/3 | 🐲⚔️ {4}/3",
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_conditional_display(byte(0x006CF0) == 0 && byte(0x0019D0) >= 0 &&
+    ((byte(0x0019D0) == 11) ||
+     (byte(0x0019D0) == 14) ||
+     (byte(0x0019D0) == 15) ||
+     (byte(0x0019D0) == 18) ||
+     (byte(0x0019D0) == 20) ||
+     (byte(0x0019D0) == 23) ||
+     (byte(0x0019D0) == 25) ||
+     (byte(0x0019D0) == 28) ||
+     (byte(0x0019D0) == 30) ||
+     (byte(0x0019D0) == 35) ||
+     (byte(0x0019D0) == 37) ||
+     (byte(0x0019D0) == 32) ||
+     (byte(0x0019D0) == 39) ||
+     (byte(0x0019D0) == 42) ||
+     (byte(0x0019D0) == 44)), "Jake is currently {0} [{1}] 👦🏻⚔️ {2}/3 | 👦🏻🛹 {3}/3 | 👦🏻👟 {4}/3 | 👦🏻❤️ {5}/3 | 👦🏻🎯 {6}/3",
+    rich_presence_lookup("Area", byte(0x0019D0), AreaLookup),
+    rich_presence_lookup("Location", byte(0x0019D0), LocationLookup),
+    rich_presence_value("Number", byte(0x007688)),
+    rich_presence_value("Number", byte(0x00765C)),
+    rich_presence_value("Number", byte(0x007660)),
+    rich_presence_value("Number", byte(0x007684)),
+    rich_presence_value("Number", byte(0x00768C))
+)
+
+rich_presence_conditional_display(byte(0x006CF0) == 1 && byte(0x0019D0) >= 0 &&
+    ((byte(0x0019D0) == 11) ||
+     (byte(0x0019D0) == 14) ||
+     (byte(0x0019D0) == 15) ||
+     (byte(0x0019D0) == 18) ||
+     (byte(0x0019D0) == 20) ||
+     (byte(0x0019D0) == 23) ||
+     (byte(0x0019D0) == 25) ||
+     (byte(0x0019D0) == 28) ||
+     (byte(0x0019D0) == 30) ||
+     (byte(0x0019D0) == 35) ||
+     (byte(0x0019D0) == 37) ||
+     (byte(0x0019D0) == 32) ||
+     (byte(0x0019D0) == 39) ||
+     (byte(0x0019D0) == 42) ||
+     (byte(0x0019D0) == 44)), "Jake is currently {0} [{1}] 🐲🌀 {2}/3 | 🐲🔥 {3}/3 | 🐲⚡ {4}/3 | 🐲💨 {5}/3 | 🐲⚔️ {6}/3",
+    rich_presence_lookup("Area", byte(0x0019D0), AreaLookup),
+    rich_presence_lookup("Location", byte(0x0019D0), LocationLookup),
+    rich_presence_value("Number", byte(0x00766C)),
+    rich_presence_value("Number", byte(0x00767C)),
+    rich_presence_value("Number", byte(0x007670)),
+    rich_presence_value("Number", byte(0x007690)),
+    rich_presence_value("Number", byte(0x007658))
+)
+
+rich_presence_display("Not currently in a stage")

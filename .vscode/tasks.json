@@ -1,0 +1,51 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "RAScript: Update Local (current file)",
+      "type": "process",
+      "command": "C:\\Users\\denis\\Downloads\\RATools-v1.17.0\\rascript-cli.exe",
+      "args": [
+        "-v",
+        "-i",
+        "${file}",
+        "-o",
+        "C:\\Users\\denis\\Desktop\\RetroAchievement Create Helpoer\\RALibretro\\bin64",
+        "-a",
+        "${input:author}"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "RATools: Open current file",
+      "type": "process",
+      "command": "C:\\Users\\denis\\Downloads\\RATools-v1.17.0\\RATools.exe",
+      "args": [
+        "${file}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "author",
+      "type": "promptString",
+      "description": "RetroAchievements author name for local assets",
+      "default": "Author"
+    }
+  ]
+}
