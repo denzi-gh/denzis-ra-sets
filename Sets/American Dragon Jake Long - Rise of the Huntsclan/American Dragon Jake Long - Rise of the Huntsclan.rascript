@@ -260,7 +260,7 @@ CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
 
 achievement(
     title = "MY EYE!!!",
-    description = "Defeat the Cyclops in under 2 minutes",
+    description = "Defeat the Cyclops in under 2 minutes and without taking damage",
     points = 25,
     type = "missable",
     trigger = IsScreen(BOSS_CYCLOPS) &&
