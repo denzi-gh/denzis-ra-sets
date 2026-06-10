@@ -7,7 +7,7 @@ function ScreenMirror() => byte(0x00373C)
 function PlayerForm() => byte(0x006CF0)
 function isOnSkateboard() => byte(0x007014)
 function HudVisible() => byte(0x006B50)
-function PauseState() => byte(0x001FBD)
+function PauseState() => byte(0x006B80)
 function VictoryPose() => byte(0x007674)
 function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
@@ -51,6 +51,8 @@ FORM_DRAGON = 1
 VICTORY_POSE_ACTIVE = 2
 ON_SKATEBOARD = 2
 ON_SKATEBOARD_AIRBORNE = 3
+PAUSE_STATE_UNPAUSED = 0x00
+PAUSE_STATE_PAUSED = 0x01
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -98,6 +100,8 @@ function LeftStage(stage) => WasScreen(stage) && ScreenId() != stage
 
 function TookDamage() => JakeHealth() < 74
 function IsSkateboarding() => isOnSkateboard() == ON_SKATEBOARD || isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
+function IsPaused() => PauseState() == PAUSE_STATE_PAUSED
+function IsUnpaused() => PauseState() == PAUSE_STATE_UNPAUSED
 
 //HUNTSGIRL BOSS FIGHT HELPER
 function HuntsgirlFullHP() => byte(0x041802) == 20
@@ -122,6 +126,7 @@ function JakeHealth() => byte(0x007026)
 function JakeIsFullHealth() => byte(0x007026) == 74
 function CyclopsHp() => byte(0x041b0a)
 function CyclopsDefeatedDelta() => CyclopsHp() == 0 && prev(CyclopsHp()) > 0
+function CyclopsTimerRunning() => IsScreen(BOSS_CYCLOPS) && IsUnpaused()
 
  
 //Check if Player was in a Specific stage before, if its not the same ID anymore and if the Victory Pose was active
@@ -261,8 +266,8 @@ achievement(
     trigger = IsScreen(BOSS_CYCLOPS) &&
               once(CyclopsFullHP()) &&
               never(TookDamage()) &&
-              never(StageTimer() >= CYCLOPS_TIME_LIMIT) &&
-              trigger_when(CyclopsDefeatedDelta() && StageTimer() < CYCLOPS_TIME_LIMIT)
+              disable_when(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning()), until=LeftStage(BOSS_CYCLOPS)) &&
+              trigger_when(CyclopsDefeatedDelta())
 )
 
 //RICH PRESENCE//
