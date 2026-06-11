@@ -96,24 +96,6 @@ function WasScreen(screen) => prev(ScreenId()) == screen
 // Checks if the Player has entered a Jump In Cutscene
 function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
 
-function IsRegularStageScreen() => IsScreen(STAGE_1_1) || IsScreen(STAGE_1_2) || IsScreen(STAGE_1_3) ||
-                                   IsScreen(STAGE_2_1) || IsScreen(STAGE_2_2) || IsScreen(STAGE_2_3) ||
-                                   IsScreen(STAGE_3_1) || IsScreen(STAGE_3_2) || IsScreen(STAGE_3_3) ||
-                                   IsScreen(STAGE_4_1) || IsScreen(STAGE_4_2) || IsScreen(STAGE_4_3) ||
-                                   IsScreen(STAGE_5_1) || IsScreen(STAGE_5_2) || IsScreen(STAGE_5_3)
-function IsBossStageScreen() => IsScreen(BOSS_HUNTSGIRL) || IsScreen(BOSS_GIANT_SPIDER) ||
-                                IsScreen(BOSS_CYCLOPS) || IsScreen(BOSS_MEDUSA) ||
-                                IsScreen(BOSS_HUNTSGIRL_REMATCH) || IsScreen(BOSS_HUNTSCLAN_CLONES) ||
-                                IsScreen(BOSS_HUNTSMAN)
-
-function IsPlayableScreen() => IsRegularStageScreen() || IsBossStageScreen()
-
-// Checks if Player has entered a specific stage, without having entered any other playable stages since then
-function EnteredOtherPlayableScreen(stage) => IsPlayableScreen() && !IsScreen(stage)
-
-// Checks if Player has entered a specific stage
-function StartedStage(stage) => once(IsScreen(stage))
-
 // PLAYER FORM HELPER
 function IsJakeForm() => PlayerForm() == FORM_JAKE
 function IsDragonForm() => PlayerForm() == FORM_DRAGON
@@ -157,10 +139,8 @@ function GiantMedusaHp() => byte(0x041dca)
 function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaHp()) > 0
 
  
-//Check if Player was in a Specific stage before, and has not entered any other playable stages since then, and is currently in the victory pose
-function StageClearCandidate(stage) => StartedStage(stage) &&
-                                       never(EnteredOtherPlayableScreen(stage)) &&
-                                       trigger_when(IsVictoryPoseActive())
+// Checks if the player has left a Stage and the Victory Pose is active during it
+function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
 
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
@@ -195,7 +175,7 @@ achievement(
     description = "Defeat the Huntsgirl and complete World 1",
     points = 10,
     type = "progression",
-    trigger = StageClearCandidate(BOSS_HUNTSGIRL)
+    trigger = HuntsgirlDefeatedDelta()
 )
 
 
@@ -240,7 +220,7 @@ achievement(
     description = "Defeat the Giant Spider and complete World 2",
     points = 10,
     type = "progression",
-    trigger = StageClearCandidate(BOSS_GIANT_SPIDER)
+    trigger = GiantSpiderDefeatedDelta()
 )
 
 achievement(
@@ -285,7 +265,7 @@ achievement(
     description = "Defeat the Cyclops and complete World 3",
     points = 10,
     type = "progression",
-    trigger = StageClearCandidate(BOSS_CYCLOPS)
+    trigger = CyclopsDefeatedDelta()
 )
 
 CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
@@ -332,7 +312,7 @@ achievement(
     description = "Defeat Giant Medusa and complete World 4",
     points = 10,
     type = "progression",
-    trigger = StageClearCandidate(BOSS_MEDUSA)
+    trigger = GiantMedusaDefeatedDelta()
 )
 
 achievement(
