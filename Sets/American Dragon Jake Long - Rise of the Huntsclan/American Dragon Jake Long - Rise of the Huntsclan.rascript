@@ -18,6 +18,8 @@ SCREEN_BOOT = 0xC8
 SCREEN_NON_STAGE = 0xC9
 SCREEN_DEBUG = 0xC0
 SCREEN_TUTORIAL = 0x3A
+SCREEN_JUMP_IN_CUTSCENE = 0xCA
+SCREEN_JUMP_IN_RETURN = 0xCB
 
 // Regular stage IDs
 STAGE_1_1 = 0x0B
@@ -91,12 +93,34 @@ PlayableScreenIds = [
 function IsScreen(screen) => ScreenId() == screen
 function WasScreen(screen) => prev(ScreenId()) == screen
 
+// Checks if the Player has entered a Jump In Cutscene
+function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
+
+function IsRegularStageScreen() => IsScreen(STAGE_1_1) || IsScreen(STAGE_1_2) || IsScreen(STAGE_1_3) ||
+                                   IsScreen(STAGE_2_1) || IsScreen(STAGE_2_2) || IsScreen(STAGE_2_3) ||
+                                   IsScreen(STAGE_3_1) || IsScreen(STAGE_3_2) || IsScreen(STAGE_3_3) ||
+                                   IsScreen(STAGE_4_1) || IsScreen(STAGE_4_2) || IsScreen(STAGE_4_3) ||
+                                   IsScreen(STAGE_5_1) || IsScreen(STAGE_5_2) || IsScreen(STAGE_5_3)
+function IsBossStageScreen() => IsScreen(BOSS_HUNTSGIRL) || IsScreen(BOSS_GIANT_SPIDER) ||
+                                IsScreen(BOSS_CYCLOPS) || IsScreen(BOSS_MEDUSA) ||
+                                IsScreen(BOSS_HUNTSGIRL_REMATCH) || IsScreen(BOSS_HUNTSCLAN_CLONES) ||
+                                IsScreen(BOSS_HUNTSMAN)
+
+function IsPlayableScreen() => IsRegularStageScreen() || IsBossStageScreen()
+
+// Checks if Player has entered a specific stage, without having entered any other playable stages since then
+function EnteredOtherPlayableScreen(stage) => IsPlayableScreen() && !IsScreen(stage)
+
+// Checks if Player has entered a specific stage
+function StartedStage(stage) => once(IsScreen(stage))
+
 // PLAYER FORM HELPER
 function IsJakeForm() => PlayerForm() == FORM_JAKE
 function IsDragonForm() => PlayerForm() == FORM_DRAGON
 function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
 function IsInStage(stage) => IsScreen(stage)
 function LeftStage(stage) => WasScreen(stage) && ScreenId() != stage
+function JakeIsFullHealth() => byte(0x007026) == 74
 
 function TookDamage() => JakeHealth() < 74
 function IsSkateboarding() => isOnSkateboard() == ON_SKATEBOARD || isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
@@ -107,7 +131,6 @@ function IsUnpaused() => PauseState() == PAUSE_STATE_UNPAUSED
 function HuntsgirlFullHP() => byte(0x041802) == 20
 function HuntsgirlDefeated() => byte(0x041802) == 0
 function JakeHealth() => byte(0x007026)
-function JakeIsFullHealth() => byte(0x007026) == 74
 function HuntsgirlHp() => byte(0x041802)
 function HuntsgirlDefeatedDelta() => HuntsgirlHp() == 0 && prev(HuntsgirlHp()) > 0
 
@@ -115,7 +138,6 @@ function HuntsgirlDefeatedDelta() => HuntsgirlHp() == 0 && prev(HuntsgirlHp()) >
 function GiantSpiderFullHP() => byte(0x041b0e) == 80
 function GiantSpiderDefeated() => byte(0x041b0e) == 0
 function JakeHealth() => byte(0x007026)
-function JakeIsFullHealth() => byte(0x007026) == 74
 function GiantSpiderHp() => byte(0x041b0e)
 function GiantSpiderDefeatedDelta() => GiantSpiderHp() == 0 && prev(GiantSpiderHp()) > 0
 
@@ -123,14 +145,22 @@ function GiantSpiderDefeatedDelta() => GiantSpiderHp() == 0 && prev(GiantSpiderH
 function CyclopsFullHP() => byte(0x041b0a) == 22
 function CyclopsDefeated() => byte(0x041b0a) == 0
 function JakeHealth() => byte(0x007026)
-function JakeIsFullHealth() => byte(0x007026) == 74
 function CyclopsHp() => byte(0x041b0a)
 function CyclopsDefeatedDelta() => CyclopsHp() == 0 && prev(CyclopsHp()) > 0
 function CyclopsTimerRunning() => IsScreen(BOSS_CYCLOPS) && IsUnpaused()
 
+//GIANT MEDUSA BOSS FIGHT HELPER
+function GiantMedusaFullHP() => byte(0x041dca) == 12
+function GiantMedusaDefeated() => byte(0x041dca) == 0
+function JakeHealth() => byte(0x007026)
+function GiantMedusaHp() => byte(0x041dca)
+function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaHp()) > 0
+
  
-//Check if Player was in a Specific stage before, if its not the same ID anymore and if the Victory Pose was active
-function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
+//Check if Player was in a Specific stage before, and has not entered any other playable stages since then, and is currently in the victory pose
+function StageClearCandidate(stage) => StartedStage(stage) &&
+                                       never(EnteredOtherPlayableScreen(stage)) &&
+                                       trigger_when(IsVictoryPoseActive())
 
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
@@ -171,12 +201,13 @@ achievement(
 
 achievement(
     title = "Love at First Fight",
-    description = "Defeat the Huntsgirl without taking damage",
+    description = "Defeat the Huntsgirl without Jump Ins and without taking damage",
     points = 25,
     type = "missable",
-    trigger = IsScreen(BOSS_HUNTSGIRL) &&
+    trigger = once(IsScreen(BOSS_HUNTSGIRL)) &&
               once(HuntsgirlFullHP()) &&
               never(TookDamage()) &&
+              never(IsJumpInScreen()) &&
               trigger_when(HuntsgirlDefeatedDelta())
 )
 
@@ -214,13 +245,14 @@ achievement(
 
 achievement(
     title = "No Board, No Bites",
-    description = "Defeat the Giant Spider without using the skateboard and without taking damage",
+    description = "Defeat the Giant Spider without Jump Ins, without using the skateboard and without taking damage",
     points = 25,
     type = "missable",
-    trigger = IsScreen(BOSS_GIANT_SPIDER) &&
+    trigger = once(IsScreen(BOSS_GIANT_SPIDER)) &&
               once(GiantSpiderFullHP()) &&
               never(TookDamage()) &&
               never(IsSkateboarding()) &&
+              never(IsJumpInScreen()) &&
               trigger_when(GiantSpiderDefeatedDelta())
 )
 
@@ -260,14 +292,59 @@ CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
 
 achievement(
     title = "MY EYE!!!",
-    description = "Defeat the Cyclops in under 2 minutes and without taking damage",
+    description = "Defeat the Cyclops in under 2 Minutes, without using Jump Ins and without taking damage",
     points = 25,
     type = "missable",
-    trigger = IsScreen(BOSS_CYCLOPS) &&
+    trigger = once(IsScreen(BOSS_CYCLOPS)) &&
               once(CyclopsFullHP()) &&
               never(TookDamage()) &&
-              disable_when(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning()), until=LeftStage(BOSS_CYCLOPS)) &&
+              never(IsJumpInScreen()) &&
+              never(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning())) &&
               trigger_when(CyclopsDefeatedDelta())
+)
+
+
+//WORLD 4 ACHIEVEMENTS
+
+achievement(
+    title = "Down by the Docks",
+    description = "Clear Stage 4-1 at the docks",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_4_1)
+)
+
+achievement(
+    title = "Across the Water",
+    description = "Clear Stage 4-2 on the way to the island lair",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_4_2)
+)
+
+achievement(
+    title = "Island of Snakes",
+    description = "Clear Stage 4-3 and reach Medusa’s lair",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_4_3)
+)
+
+achievement(
+    title = "Hair-Raising Medusa",
+    description = "Defeat Giant Medusa and complete World 4",
+    points = 10,
+    type = "progression",
+    trigger = StageClearCandidate(BOSS_MEDUSA)
+)
+
+achievement(
+    title = "Slither Skater",
+    description = "Defeat Giant Medusa without Jump Ins, without using the skateboard and without taking damage",
+    points = 25,
+    type = "missable",
+    trigger = once(IsScreen(BOSS_MEDUSA)) &&
+              once(GiantMedusaFullHP()) &&
+              never(TookDamage()) &&
+              never(IsJumpInScreen()) &&
+              trigger_when(GiantMedusaDefeatedDelta())
 )
 
 //RICH PRESENCE//
