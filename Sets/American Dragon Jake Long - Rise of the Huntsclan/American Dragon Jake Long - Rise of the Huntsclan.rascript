@@ -100,6 +100,7 @@ function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREE
 function IsJakeForm() => PlayerForm() == FORM_JAKE
 function IsDragonForm() => PlayerForm() == FORM_DRAGON
 function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
+function WasVictoryPoseActive() => prev(VictoryPose()) == VICTORY_POSE_ACTIVE
 function IsInStage(stage) => IsScreen(stage)
 function LeftStage(stage) => WasScreen(stage) && ScreenId() != stage
 function JakeIsFullHealth() => byte(0x007026) == 74
@@ -121,14 +122,14 @@ function GiantSpiderFullHP() => byte(0x041b0e) == 80
 function GiantSpiderDefeated() => byte(0x041b0e) == 0
 function JakeHealth() => byte(0x007026)
 function GiantSpiderHp() => byte(0x041b0e)
-function GiantSpiderDefeatedDelta() => GiantSpiderHp() == 0 && prev(GiantSpiderHp()) > 0
+function GiantSpiderDefeatedDelta() => GiantSpiderDefeated() && prev(GiantSpiderHp()) > 0 && prev(GiantSpiderHp()) <= 80
 
 //CYCLOPS BOSS FIGHT HELPER
 function CyclopsFullHP() => byte(0x041b0a) == 22
-function CyclopsDefeated() => byte(0x041b0a) == 0
+function CyclopsDefeated() => byte(0x041b0a) == 0xFF
 function JakeHealth() => byte(0x007026)
 function CyclopsHp() => byte(0x041b0a)
-function CyclopsDefeatedDelta() => CyclopsHp() == 0 && prev(CyclopsHp()) > 0
+function CyclopsDefeatedDelta() => CyclopsDefeated() && prev(CyclopsHp()) > 0 && prev(CyclopsHp()) <= 22
 function CyclopsTimerRunning() => IsScreen(BOSS_CYCLOPS) && IsUnpaused()
 
 //GIANT MEDUSA BOSS FIGHT HELPER
@@ -141,6 +142,10 @@ function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaH
  
 // Checks if the player has left a Stage and the Victory Pose is active during it
 function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
+function LeftJumpInReturn() => WasScreen(SCREEN_JUMP_IN_RETURN) && ScreenId() != SCREEN_JUMP_IN_RETURN
+function BossStageClearCandidate(stage) => once(IsScreen(stage)) &&
+                                           (LeftStage(stage) || LeftJumpInReturn()) &&
+                                           (IsVictoryPoseActive() || WasVictoryPoseActive())
 
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
@@ -175,7 +180,8 @@ achievement(
     description = "Defeat the Huntsgirl and complete World 1",
     points = 10,
     type = "progression",
-    trigger = HuntsgirlDefeatedDelta()
+    trigger = once(HuntsgirlDefeatedDelta()) &&
+              BossStageClearCandidate(BOSS_HUNTSGIRL)
 )
 
 
@@ -220,7 +226,8 @@ achievement(
     description = "Defeat the Giant Spider and complete World 2",
     points = 10,
     type = "progression",
-    trigger = GiantSpiderDefeatedDelta()
+    trigger = once(GiantSpiderDefeatedDelta()) &&
+              BossStageClearCandidate(BOSS_GIANT_SPIDER)
 )
 
 achievement(
@@ -265,7 +272,8 @@ achievement(
     description = "Defeat the Cyclops and complete World 3",
     points = 10,
     type = "progression",
-    trigger = CyclopsDefeatedDelta()
+    trigger = once(CyclopsDefeatedDelta()) &&
+              BossStageClearCandidate(BOSS_CYCLOPS)
 )
 
 CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
@@ -312,7 +320,8 @@ achievement(
     description = "Defeat Giant Medusa and complete World 4",
     points = 10,
     type = "progression",
-    trigger = GiantMedusaDefeatedDelta()
+    trigger = once(GiantMedusaDefeatedDelta()) &&
+              BossStageClearCandidate(BOSS_MEDUSA)
 )
 
 achievement(
