@@ -166,8 +166,9 @@ CLONE_TANK_EMPTY_HP = 0x00
 CLONE_TANK_DEFEATED = 0xFF
 
 function CloneTankHp(address) => byte(address)
-function CloneTankDefeatedDelta() => any_of(CLONE_TANK_HP_ADDRESSES, address => CloneTankHp(address) == CLONE_TANK_DEFEATED && prev(CloneTankHp(address)) == CLONE_TANK_EMPTY_HP)
-function HuntsclanClonesStagePaused() => IsScreen(BOSS_HUNTSCLAN_CLONES) && IsPaused()
+function CloneTankDefeatedDelta() => any_of(CLONE_TANK_HP_ADDRESSES, address => IsScreen(BOSS_HUNTSCLAN_CLONES) && CloneTankHp(address) == CLONE_TANK_DEFEATED && prev(CloneTankHp(address)) == CLONE_TANK_EMPTY_HP)
+function HuntsclanClonesTimerRunning() => IsScreen(BOSS_HUNTSCLAN_CLONES) && IsUnpaused()
+function LeftHuntsclanClonesAttempt() => WasScreen(BOSS_HUNTSCLAN_CLONES) && ScreenId() != BOSS_HUNTSCLAN_CLONES && ScreenId() != SCREEN_JUMP_IN_CUTSCENE && ScreenId() != SCREEN_JUMP_IN_RETURN
 
 //HUNTSMAN Helper
 HUNTSMAN_HP_ADDRESSES = [
@@ -432,10 +433,8 @@ achievement(
     points = 25,
     type = "missable",
     trigger = once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
-              once(StageTimer() > 0) &&
-              never(HuntsclanClonesStagePaused()) &&
-              never(IsJumpInScreen()) &&
-              StageTimer() < HUNTSCLAN_CLONES_TIME_LIMIT &&
+              disable_when(IsJumpInScreen(), LeftHuntsclanClonesAttempt()) &&
+              disable_when(repeated(HUNTSCLAN_CLONES_TIME_LIMIT, HuntsclanClonesTimerRunning()), LeftHuntsclanClonesAttempt()) &&
               trigger_when(CloneTankDefeatedDelta())
 )
 
