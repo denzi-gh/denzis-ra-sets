@@ -151,6 +151,39 @@ function BossStageClearCandidate(stage) => once(IsScreen(stage)) &&
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
 
+//HUNTSCLAN CLONES BOSS FIGHT HELPER
+CLONE_TANK_HP_ADDRESSES = [
+    //Adresses are always +0x2E0
+    0x0420A6,
+    0x042386,
+    0x042666,
+    0x042946,
+    0x042C26,
+    0x042F06,
+    0x0431E6
+]
+CLONE_TANK_EMPTY_HP = 0x00
+CLONE_TANK_DEFEATED = 0xFF
+
+function CloneTankHp(address) => byte(address)
+function CloneTankDefeatedDelta() => any_of(CLONE_TANK_HP_ADDRESSES, address => CloneTankHp(address) == CLONE_TANK_DEFEATED && prev(CloneTankHp(address)) == CLONE_TANK_EMPTY_HP)
+function HuntsclanClonesStagePaused() => IsScreen(BOSS_HUNTSCLAN_CLONES) && IsPaused()
+
+//HUNTSMAN Helper
+HUNTSMAN_HP_ADDRESSES = [
+    0x0423DC,
+    0x041B3C
+]
+
+HUNTSMAN_FINAL_PHASE_HP = 0x08
+HUNTSMAN_LAST_HP = 0x01
+HUNTSMAN_DEFEATED_HP = 0x00
+
+function HuntsmanHp(address) => byte(address)
+//Huntsman has four Phases and regenerates Health in that Order: 3, 3, 6, 8 - HP must be 0x08 once (that detects if the Final Phase is reached)
+function HuntsmanFinalPhaseDefeatedDelta() => any_of(HUNTSMAN_HP_ADDRESSES, address => once(HuntsmanHp(address) == HUNTSMAN_FINAL_PHASE_HP) && HuntsmanHp(address) == HUNTSMAN_DEFEATED_HP && prev(HuntsmanHp(address)) == HUNTSMAN_LAST_HP)
+
+
 
 
 //WORLD 1 ACHIEVEMENTS
@@ -380,6 +413,52 @@ achievement(
               never(IsJumpInScreen()) &&
               never(IsSkateboarding()) &&
               trigger_when(HuntsgirlDefeatedDelta())
+)
+
+// Huntsman Clones Achievements
+
+achievement(
+    title = "Clone Pile-Up",
+    description = "Defeat the Huntsclan Clones and complete the game",
+    points = 50,
+    type = "win_condition",
+    trigger = BossStageClearCandidate(BOSS_HUNTSCLAN_CLONES)
+)
+
+HUNTSCLAN_CLONES_TIME_LIMIT = 5 * 60 * 60 //(5 minutes in frames)
+
+achievement(
+    title = "Young, Fast, and Cloning",
+    description = "Defeat the Huntsclan Clones in under 5(WIP) minutes without using Jump-Ins",
+    points = 25,
+    type = "missable",
+    trigger = once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
+              once(StageTimer() > 0) &&
+              never(HuntsclanClonesStagePaused()) &&
+              never(IsJumpInScreen()) &&
+              StageTimer() < HUNTSCLAN_CLONES_TIME_LIMIT &&
+              trigger_when(CloneTankDefeatedDelta())
+)
+
+// HUNTSMAN FINAL BOSS ACHIEVEMENTS
+
+achievement(
+    title = "Take that, Huntsfool!",
+    description = "Defeat the Huntsman",
+    points = 25,
+    trigger = BossStageClearCandidate(BOSS_HUNTSMAN)
+)
+
+achievement(
+    title = "Huntsman, More Like HuntsCAN'T",
+    description = "Defeat the Huntsman without using Jump-Ins and without taking damage",
+    points = 50,
+    type = "missable",
+    trigger = once(IsScreen(BOSS_HUNTSMAN)) &&
+              never(TookDamage()) &&
+              never(IsJumpInScreen()) &&
+              // Huntsman reaches 0 multiple times and regenerates due to Phases, helper checks if Health was 0x08 (Last Phase Health) once
+              trigger_when(HuntsmanFinalPhaseDefeatedDelta())
 )
 //RICH PRESENCE//
 
