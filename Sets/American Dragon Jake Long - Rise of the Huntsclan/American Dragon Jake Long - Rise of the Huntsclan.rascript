@@ -359,12 +359,13 @@ achievement(
 )
 
 achievement(
-    title = "Slither Skater",
-    description = "Defeat Giant Medusa without Jump Ins, without using the skateboard and without taking damage",
+    title = "Dragon vs. Snake",
+    description = "Defeat Giant Medusa while in Dragon Form, without Jump Ins and without taking damage",
     points = 25,
     type = "missable",
     trigger = once(IsScreen(BOSS_MEDUSA)) &&
               once(GiantMedusaFullHP()) &&
+              IsDragonForm() &&
               never(TookDamage()) &&
               never(IsJumpInScreen()) &&
               trigger_when(GiantMedusaDefeatedDelta())
