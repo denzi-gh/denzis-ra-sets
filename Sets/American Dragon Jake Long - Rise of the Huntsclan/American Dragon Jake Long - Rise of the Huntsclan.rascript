@@ -112,6 +112,7 @@ function IsUnpaused() => PauseState() == PAUSE_STATE_UNPAUSED
 
 //HUNTSGIRL BOSS FIGHT HELPER
 function HuntsgirlFullHP() => byte(0x041802) == 20
+function HuntsgirlRematchFullHP() => byte(0x041802) == 30
 function HuntsgirlDefeated() => byte(0x041802) == 0
 function JakeHealth() => byte(0x007026)
 function HuntsgirlHp() => byte(0x041802)
@@ -139,7 +140,7 @@ function JakeHealth() => byte(0x007026)
 function GiantMedusaHp() => byte(0x041dca)
 function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaHp()) > 0
 
- 
+
 // Checks if the player has left a Stage and the Victory Pose is active during it
 function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
 function LeftJumpInReturn() => WasScreen(SCREEN_JUMP_IN_RETURN) && ScreenId() != SCREEN_JUMP_IN_RETURN
@@ -336,6 +337,50 @@ achievement(
               trigger_when(GiantMedusaDefeatedDelta())
 )
 
+//WORLD 5 ACHIEVEMENTS
+
+achievement(
+    title = "Temple Trouble",
+    description = "Clear Stage 5-1 and enter the Huntsclan stronghold",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_5_1)
+)
+
+achievement(
+    title = "Dungeon Descent",
+    description = "Clear Stage 5-2 through the dungeon",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_5_2)
+)
+
+achievement(
+    title = "Final Showdown Approach",
+    description = "Clear Stage 5-3 and reach the final showdown",
+    points = 5,
+    trigger = StageClearCandidate(STAGE_5_3)
+)
+
+achievement(
+    title = "Huntsgirl: The Return",
+    description = "Defeat Huntsgirl again and complete World 5",
+    points = 10,
+    type = "progression",
+    trigger = once(HuntsgirlDefeatedDelta()) &&
+              BossStageClearCandidate(BOSS_HUNTSGIRL_REMATCH)
+)
+
+achievement(
+    title = "Grounded Rematch",
+    description = "Defeat the Huntsgirl rematch without Jump Ins, without using the skateboard and without taking damage",
+    points = 25,
+    type = "missable",
+    trigger = once(IsScreen(BOSS_HUNTSGIRL_REMATCH)) &&
+              once(HuntsgirlRematchFullHP()) &&
+              never(TookDamage()) &&
+              never(IsJumpInScreen()) &&
+              never(IsSkateboarding()) &&
+              trigger_when(HuntsgirlDefeatedDelta())
+)
 //RICH PRESENCE//
 
 StageNameLookup = {
