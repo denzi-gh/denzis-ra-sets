@@ -131,7 +131,7 @@ function CyclopsDefeated() => byte(0x041b0a) == 0xFF
 function JakeHealth() => byte(0x007026)
 function CyclopsHp() => byte(0x041b0a)
 function CyclopsDefeatedDelta() => CyclopsDefeated() && prev(CyclopsHp()) > 0 && prev(CyclopsHp()) <= 22
-function CyclopsPaused() => IsScreen(BOSS_CYCLOPS) && IsPaused()
+function CyclopsTimerRunning() => IsScreen(BOSS_CYCLOPS) && IsUnpaused()
 
 //GIANT MEDUSA BOSS FIGHT HELPER
 function GiantMedusaFullHP() => byte(0x041dca) == 12
@@ -318,11 +318,9 @@ achievement(
     points = 25,
     type = "missable",
     trigger = once(IsScreen(BOSS_CYCLOPS)) &&
-              once(StageTimer() > 0) &&
               never(TookDamage()) &&
               never(IsJumpInScreen()) &&
-              never(CyclopsPaused()) &&
-              StageTimer() < CYCLOPS_TIME_LIMIT &&
+              disable_when(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning())) &&
               trigger_when(CyclopsDefeatedDelta())
 )
 
