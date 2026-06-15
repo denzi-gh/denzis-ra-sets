@@ -12,6 +12,16 @@ function VictoryPose() => byte(0x007674)
 function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
 function StageTimerHigh() => word(0x0062B6)
+function DragonAttackLevel() => byte(0x007658)
+function DragonDrainLevel() => byte(0x00766c)
+function DragonChargeLevel() => byte(0x007670)
+function DragonFireLevel() => byte(0x00767c)
+function DragonSpeedLevel() => byte(0x007690)
+function JakeAttackLevel() => byte(0x007688)
+function JakeSkateLevel() => byte(0x00765c)
+function JakeSpeedLevel() => byte(0x007660)
+function JakeHealthLevel() => byte(0x007684)
+function JakeFocusLevel() => byte(0x00768c)
 
 // Screen IDs
 SCREEN_BOOT = 0xC8
@@ -55,6 +65,7 @@ ON_SKATEBOARD = 2
 ON_SKATEBOARD_AIRBORNE = 3
 PAUSE_STATE_UNPAUSED = 0x00
 PAUSE_STATE_PAUSED = 0x01
+MAX_ABILITY_LEVEL = 0x03
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -183,6 +194,19 @@ HUNTSMAN_DEFEATED_HP = 0x00
 function HuntsmanHp(address) => byte(address)
 //Huntsman has four Phases and regenerates Health in that Order: 3, 3, 6, 8 - HP must be 0x08 once (that detects if the Final Phase is reached)
 function HuntsmanFinalPhaseDefeatedDelta() => any_of(HUNTSMAN_HP_ADDRESSES, address => once(HuntsmanHp(address) == HUNTSMAN_FINAL_PHASE_HP) && HuntsmanHp(address) == HUNTSMAN_DEFEATED_HP && prev(HuntsmanHp(address)) == HUNTSMAN_LAST_HP)
+
+//ABILITY HELPER
+function DragonAttackLevelMaxedDelta() => DragonAttackLevel() == MAX_ABILITY_LEVEL && prev(DragonAttackLevel()) < MAX_ABILITY_LEVEL
+function DragonDrainLevelMaxedDelta() => DragonDrainLevel() == MAX_ABILITY_LEVEL && prev(DragonDrainLevel()) < MAX_ABILITY_LEVEL
+function DragonChargeLevelMaxedDelta() => DragonChargeLevel() == MAX_ABILITY_LEVEL && prev(DragonChargeLevel()) < MAX_ABILITY_LEVEL
+function DragonFireLevelMaxedDelta() => DragonFireLevel() == MAX_ABILITY_LEVEL && prev(DragonFireLevel()) < MAX_ABILITY_LEVEL
+function DragonSpeedLevelMaxedDelta() => DragonSpeedLevel() == MAX_ABILITY_LEVEL && prev(DragonSpeedLevel()) < MAX_ABILITY_LEVEL
+
+function JakeAttackLevelMaxedDelta() => JakeAttackLevel() == MAX_ABILITY_LEVEL && prev(JakeAttackLevel()) < MAX_ABILITY_LEVEL
+function JakeSkateLevelMaxedDelta() => JakeSkateLevel() == MAX_ABILITY_LEVEL && prev(JakeSkateLevel()) < MAX_ABILITY_LEVEL
+function JakeSpeedLevelMaxedDelta() => JakeSpeedLevel() == MAX_ABILITY_LEVEL && prev(JakeSpeedLevel()) < MAX_ABILITY_LEVEL
+function JakeHealthLevelMaxedDelta() => JakeHealthLevel() == MAX_ABILITY_LEVEL && prev(JakeHealthLevel()) < MAX_ABILITY_LEVEL
+function JakeFocusLevelMaxedDelta() => JakeFocusLevel() == MAX_ABILITY_LEVEL && prev(JakeFocusLevel()) < MAX_ABILITY_LEVEL
 
 
 
@@ -459,6 +483,25 @@ achievement(
               // Huntsman reaches 0 multiple times and regenerates due to Phases, helper checks if Health was 0x08 (Last Phase Health) once
               trigger_when(HuntsmanFinalPhaseDefeatedDelta())
 )
+
+//Ability Achievements
+
+achievement(
+    title = "His skills are getting faster",
+    description = "Max out any Ability for the first time",
+    points = 5,
+    trigger = DragonAttackLevelMaxedDelta() ||
+              DragonDrainLevelMaxedDelta() ||
+              DragonChargeLevelMaxedDelta() ||
+              DragonFireLevelMaxedDelta() ||
+              DragonSpeedLevelMaxedDelta() ||
+              JakeAttackLevelMaxedDelta() ||
+              JakeSkateLevelMaxedDelta() ||
+              JakeSpeedLevelMaxedDelta() ||
+              JakeHealthLevelMaxedDelta() ||
+              JakeFocusLevelMaxedDelta()
+)
+
 //RICH PRESENCE//
 
 StageNameLookup = {
