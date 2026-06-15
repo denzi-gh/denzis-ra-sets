@@ -12,6 +12,9 @@ function VictoryPose() => byte(0x007674)
 function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
 function StageTimerHigh() => word(0x0062B6)
+function FuDogJumpInAvailable() => byte(0x006BD8)
+function DragonMeter() => byte(0x00707E)
+function EnemiesOnScreen() => byte(0x007470)
 function EnemiesDespawned() => byte(0x0074C0)
 function DragonAttackLevel() => byte(0x007658)
 function DragonDrainLevel() => byte(0x00766c)
@@ -66,12 +69,16 @@ ON_SKATEBOARD = 2
 ON_SKATEBOARD_AIRBORNE = 3
 PAUSE_STATE_UNPAUSED = 0x00
 PAUSE_STATE_PAUSED = 0x01
+JUMP_IN_AVAILABLE = 0x01
+JUMP_IN_UNAVAILABLE = 0x00
+DRAGON_METER_FULL = 0x32
 MAX_ABILITY_LEVEL = 0x03
 PRE_MAX_ABILITY_LEVEL = 0x02
 JAKE_ABILITY_MAX_TOTAL = 0x0F
 DRAGON_ABILITY_MAX_TOTAL = 0x0F
 ALL_ABILITY_MAX_TOTAL = 0x1E
 DRAGON_UP_ENEMY_TARGET = 30
+GOOD_BOY_FU_DOG_ENEMY_TARGET = 15
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -112,12 +119,15 @@ function WasScreen(screen) => prev(ScreenId()) == screen
 
 // Checks if the Player has entered a Jump In Cutscene
 function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
+function FuDogJumpInUsed() => FuDogJumpInAvailable() == JUMP_IN_UNAVAILABLE
+function DragonMeterFilledDelta() => DragonMeter() == DRAGON_METER_FULL && prev(DragonMeter()) < DRAGON_METER_FULL
+function DragonMeterFull() => DragonMeter() == DRAGON_METER_FULL
 
 // PLAYER FORM HELPER
 function IsJakeForm() => PlayerForm() == FORM_JAKE
 function IsDragonForm() => PlayerForm() == FORM_DRAGON
-function EnteredDragonForm() => IsDragonForm() && prev(PlayerForm()) == FORM_JAKE
-function DragonTransformationEnded() => IsJakeForm() && prev(PlayerForm()) == FORM_DRAGON
+function EnteredDragonForm() => PlayerForm() > prev(PlayerForm())
+function DragonTransformationEnded() => PlayerForm() < prev(PlayerForm())
 function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
 function WasVictoryPoseActive() => prev(VictoryPose()) == VICTORY_POSE_ACTIVE
 function IsInStage(stage) => IsScreen(stage)
@@ -192,6 +202,8 @@ function LeftHuntsclanClonesAttempt() => WasScreen(BOSS_HUNTSCLAN_CLONES) && Scr
 
 //ENEMY HELPER
 function EnemyDefeatedDelta() => EnemiesDespawned() > prev(EnemiesDespawned())
+function EnemyWaveActive() => EnemiesOnScreen() > 0
+function EnemyWaveClearedDelta() => EnemiesOnScreen() == 0 && prev(EnemiesOnScreen()) > 0
 
 //HUNTSMAN Helper
 HUNTSMAN_HP_ADDRESSES = [
@@ -509,6 +521,18 @@ achievement(
     trigger = once(EnteredDragonForm()) &&
               never(DragonTransformationEnded()) &&
               measured(repeated(DRAGON_UP_ENEMY_TARGET, IsDragonForm() && EnemyDefeatedDelta()))
+)
+
+achievement(
+    title = "Good Boy, Fu Dog",
+    description = "Use Fu Dog's Jump In to fill the Focus meter, Dragon Up, and defeat 15 enemies before the transformation ends",
+    points = 5,
+    trigger = once(IsScreen(SCREEN_JUMP_IN_RETURN)) &&
+              once(FuDogJumpInUsed()) &&
+              once(DragonMeterFull()) &&
+              once(PlayerForm() >= prev(PlayerForm())) &&
+              never(DragonTransformationEnded()) &&
+              repeated(GOOD_BOY_FU_DOG_ENEMY_TARGET, IsDragonForm() && EnemyDefeatedDelta())
 )
 
 achievement(
