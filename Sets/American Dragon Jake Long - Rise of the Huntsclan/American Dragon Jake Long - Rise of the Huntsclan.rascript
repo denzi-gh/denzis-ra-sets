@@ -162,6 +162,7 @@ function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaH
 
 // Checks if the player has left a Stage and the Victory Pose is active during it
 function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
+function AnyRegularStageClearCandidate() => any_of(RegularStageIds, stage => StageClearCandidate(stage))
 function LeftJumpInReturn() => WasScreen(SCREEN_JUMP_IN_RETURN) && ScreenId() != SCREEN_JUMP_IN_RETURN
 function BossStageClearCandidate(stage) => once(IsScreen(stage)) &&
                                            (LeftStage(stage) || LeftJumpInReturn()) &&
@@ -508,6 +509,16 @@ achievement(
     trigger = once(EnteredDragonForm()) &&
               never(DragonTransformationEnded()) &&
               measured(repeated(DRAGON_UP_ENEMY_TARGET, IsDragonForm() && EnemyDefeatedDelta()))
+)
+
+achievement(
+    title = "He's cool, he's hot like a frozen sun",
+    description = "Clear any non-boss stage without taking damage and without using Dragon Mode",
+    points = 10,
+    trigger = once(any_of(RegularStageIds, stage => IsScreen(stage))) &&
+              never(TookDamage()) &&
+              never(IsDragonForm()) &&
+              AnyRegularStageClearCandidate()
 )
 
 //Ability Achievements
