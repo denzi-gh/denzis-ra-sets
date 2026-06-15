@@ -121,6 +121,7 @@ PlayableScreenIds = [
 // SCREEN HELPER
 function IsScreen(screen) => ScreenId() == screen
 function WasScreen(screen) => prev(ScreenId()) == screen
+function EnteredScreen(screen) => IsScreen(screen) && !WasScreen(screen)
 
 // Checks if the Player has entered a Jump In Cutscene
 function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
@@ -190,6 +191,9 @@ function BossStageClearCandidate(stage) => once(IsScreen(stage)) &&
 
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
+function BossLeaderboardStart(stage) => EnteredScreen(stage)
+function BossLeaderboardCancel(stage) => IsJumpInScreen() || !IsScreen(stage)
+function BossLeaderboardTimerRunning() => IsUnpaused()
 
 //HUNTSCLAN CLONES BOSS FIGHT HELPER
 CLONE_TANK_HP_ADDRESSES = [
@@ -633,6 +637,85 @@ achievement(
                JakeHealthLevelMaxedDelta() ||
                JakeFocusLevelMaxedDelta()) &&
               measured(AllAbilityLevelTotal() == ALL_ABILITY_MAX_TOTAL)
+)
+
+// LEADERBOARDS
+
+leaderboard(
+    title = "Huntsgirl Boss Stage Speedrun",
+    description = "Defeat the Huntsgirl as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_HUNTSGIRL),
+    cancel = BossLeaderboardCancel(BOSS_HUNTSGIRL),
+    submit = HuntsgirlDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Giant Spider Boss Stage Speedrun",
+    description = "Defeat the Giant Spider as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_GIANT_SPIDER),
+    cancel = BossLeaderboardCancel(BOSS_GIANT_SPIDER),
+    submit = GiantSpiderDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Cyclops Boss Stage Speedrun",
+    description = "Defeat the Cyclops as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_CYCLOPS),
+    cancel = BossLeaderboardCancel(BOSS_CYCLOPS),
+    submit = CyclopsDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Giant Medusa Boss Stage Speedrun",
+    description = "Defeat the Giant Medusa as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_MEDUSA),
+    cancel = BossLeaderboardCancel(BOSS_MEDUSA),
+    submit = GiantMedusaDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Huntsgirl Rematch Speedrun",
+    description = "Defeat the Huntsgirl again as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_HUNTSGIRL_REMATCH),
+    cancel = BossLeaderboardCancel(BOSS_HUNTSGIRL_REMATCH),
+    submit = HuntsgirlDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Huntsman Clones Boss Stage Speedrun",
+    description = "Defeat the Huntsman Clones as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_HUNTSCLAN_CLONES),
+    cancel = BossLeaderboardCancel(BOSS_HUNTSCLAN_CLONES),
+    submit = CloneTankDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
+)
+
+leaderboard(
+    title = "Huntsman Boss Stage Speedrun",
+    description = "Defeat the Huntsman as fast as possible without using Jump-ins",
+    start = BossLeaderboardStart(BOSS_HUNTSMAN),
+    cancel = BossLeaderboardCancel(BOSS_HUNTSMAN),
+    submit = HuntsmanFinalPhaseDefeatedDelta(),
+    value = measured(repeated(0, BossLeaderboardTimerRunning())),
+    format = "FRAMES",
+    lower_is_better = true
 )
 
 //RICH PRESENCE//
