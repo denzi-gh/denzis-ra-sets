@@ -13,6 +13,7 @@ function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
 function StageTimerHigh() => word(0x0062B6)
 function FuDogJumpInAvailable() => byte(0x006BD8)
+function TrixieSpudJumpInAvailable() => byte(0x006BDA)
 function DragonMeter() => byte(0x00707E)
 function EnemiesOnScreen() => byte(0x007470)
 function EnemiesDespawned() => byte(0x0074C0)
@@ -72,6 +73,7 @@ PAUSE_STATE_PAUSED = 0x01
 JUMP_IN_AVAILABLE = 0x01
 JUMP_IN_UNAVAILABLE = 0x00
 DRAGON_METER_FULL = 0x32
+JAKE_FULL_HEALTH = 74
 MAX_ABILITY_LEVEL = 0x03
 PRE_MAX_ABILITY_LEVEL = 0x02
 JAKE_ABILITY_MAX_TOTAL = 0x0F
@@ -79,6 +81,7 @@ DRAGON_ABILITY_MAX_TOTAL = 0x0F
 ALL_ABILITY_MAX_TOTAL = 0x1E
 DRAGON_UP_ENEMY_TARGET = 30
 GOOD_BOY_FU_DOG_ENEMY_TARGET = 15
+CHEESEBURGER_COMEBACK_WAVE_TARGET = 3
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -120,6 +123,7 @@ function WasScreen(screen) => prev(ScreenId()) == screen
 // Checks if the Player has entered a Jump In Cutscene
 function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
 function FuDogJumpInUsed() => FuDogJumpInAvailable() == JUMP_IN_UNAVAILABLE
+function TrixieSpudJumpInUsed() => TrixieSpudJumpInAvailable() == JUMP_IN_UNAVAILABLE
 function DragonMeterFilledDelta() => DragonMeter() == DRAGON_METER_FULL && prev(DragonMeter()) < DRAGON_METER_FULL
 function DragonMeterFull() => DragonMeter() == DRAGON_METER_FULL
 
@@ -132,9 +136,11 @@ function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
 function WasVictoryPoseActive() => prev(VictoryPose()) == VICTORY_POSE_ACTIVE
 function IsInStage(stage) => IsScreen(stage)
 function LeftStage(stage) => WasScreen(stage) && ScreenId() != stage
-function JakeIsFullHealth() => byte(0x007026) == 74
+function JakeIsFullHealth() => JakeHealth() == JAKE_FULL_HEALTH
 
-function TookDamage() => JakeHealth() < 74
+function TookDamage() => JakeHealth() < JAKE_FULL_HEALTH
+function TookDamageDelta() => JakeHealth() < prev(JakeHealth())
+function HealedToFullHealthDelta() => JakeIsFullHealth() && prev(JakeHealth()) < JAKE_FULL_HEALTH
 function IsSkateboarding() => isOnSkateboard() == ON_SKATEBOARD || isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
 function IsPaused() => PauseState() == PAUSE_STATE_PAUSED
 function IsUnpaused() => PauseState() == PAUSE_STATE_UNPAUSED
@@ -533,6 +539,17 @@ achievement(
               once(PlayerForm() >= prev(PlayerForm())) &&
               never(DragonTransformationEnded()) &&
               repeated(GOOD_BOY_FU_DOG_ENEMY_TARGET, IsDragonForm() && EnemyDefeatedDelta())
+)
+
+achievement(
+    title = "Cheeseburger Comeback",
+    description = "Use Trixie & Spud’s Jump In, heal to full health, then clear three enemy waves without taking another hit",
+    points = 5,
+    trigger = once(IsScreen(SCREEN_JUMP_IN_RETURN)) &&
+              once(TrixieSpudJumpInUsed()) &&
+              once(HealedToFullHealthDelta()) &&
+              never(TookDamageDelta()) &&
+              measured(repeated(CHEESEBURGER_COMEBACK_WAVE_TARGET, IsScreen(SCREEN_JUMP_IN_RETURN) && JakeIsFullHealth() && EnemyWaveClearedDelta()))
 )
 
 achievement(
