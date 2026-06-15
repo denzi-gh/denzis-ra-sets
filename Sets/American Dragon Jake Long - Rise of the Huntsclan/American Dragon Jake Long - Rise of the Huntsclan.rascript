@@ -13,6 +13,7 @@ function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
 function StageTimerHigh() => word(0x0062B6)
 function FuDogJumpInAvailable() => byte(0x006BD8)
+function GrandpaJumpInAvailable() => byte(0x006BD9)
 function TrixieSpudJumpInAvailable() => byte(0x006BDA)
 function DragonMeter() => byte(0x00707E)
 function EnemiesOnScreen() => byte(0x007470)
@@ -82,6 +83,7 @@ ALL_ABILITY_MAX_TOTAL = 0x1E
 DRAGON_UP_ENEMY_TARGET = 30
 GOOD_BOY_FU_DOG_ENEMY_TARGET = 15
 CHEESEBURGER_COMEBACK_WAVE_TARGET = 3
+GRANDPA_MASTER_ENEMY_TARGET = 2
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -123,7 +125,9 @@ function WasScreen(screen) => prev(ScreenId()) == screen
 // Checks if the Player has entered a Jump In Cutscene
 function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREEN_JUMP_IN_RETURN)
 function FuDogJumpInUsed() => FuDogJumpInAvailable() == JUMP_IN_UNAVAILABLE
+function GrandpaJumpInUsedDelta() => GrandpaJumpInAvailable() == JUMP_IN_UNAVAILABLE && prev(GrandpaJumpInAvailable()) == JUMP_IN_AVAILABLE
 function TrixieSpudJumpInUsed() => TrixieSpudJumpInAvailable() == JUMP_IN_UNAVAILABLE
+function TrixieSpudJumpInUsedDelta() => TrixieSpudJumpInAvailable() == JUMP_IN_UNAVAILABLE && prev(TrixieSpudJumpInAvailable()) == JUMP_IN_AVAILABLE
 function DragonMeterFilledDelta() => DragonMeter() == DRAGON_METER_FULL && prev(DragonMeter()) < DRAGON_METER_FULL
 function DragonMeterFull() => DragonMeter() == DRAGON_METER_FULL
 
@@ -546,10 +550,20 @@ achievement(
     description = "Use Trixie & Spud’s Jump In, heal to full health, then clear three enemy waves without taking another hit",
     points = 5,
     trigger = once(IsScreen(SCREEN_JUMP_IN_RETURN)) &&
-              once(TrixieSpudJumpInUsed()) &&
+              once(TrixieSpudJumpInUsedDelta()) &&
               once(HealedToFullHealthDelta()) &&
               never(TookDamageDelta()) &&
-              measured(repeated(CHEESEBURGER_COMEBACK_WAVE_TARGET, IsScreen(SCREEN_JUMP_IN_RETURN) && JakeIsFullHealth() && EnemyWaveClearedDelta()))
+              measured(repeated(CHEESEBURGER_COMEBACK_WAVE_TARGET, IsScreen(SCREEN_JUMP_IN_RETURN) && TrixieSpudJumpInUsed() && JakeIsFullHealth() && EnemyWaveClearedDelta()))
+)
+
+achievement(
+    title = "Grandpa the master",
+    description = "Use Grandpa’s Jump In to defeat 5 enemies with his fireball attack",
+    points = 5,
+    trigger = once(GrandpaJumpInUsedDelta()) &&
+              once(IsScreen(SCREEN_JUMP_IN_RETURN)) &&
+              never(LeftJumpInReturn() && EnemyWaveActive()) &&
+              measured(repeated(GRANDPA_MASTER_ENEMY_TARGET, IsScreen(SCREEN_JUMP_IN_RETURN) && EnemyDefeatedDelta()))
 )
 
 achievement(
