@@ -448,7 +448,7 @@ achievement(
 
 achievement(
     title = "Dungeon Descent",
-    description = "Clear Stage 5-2 through the dungeon",
+    description = "Clear Stage 5-2 as Jake descends into the darkness",
     points = 5,
     trigger = StageClearCandidate(STAGE_5_2)
 )
@@ -516,7 +516,7 @@ achievement(
 
 achievement(
     title = "Huntsman, More Like HuntsCAN'T",
-    description = "Defeat the Huntsman without using Jump-Ins and without taking damage",
+    description = "Defeat the Huntsman without using Jump Ins and without taking damage",
     points = 50,
     type = "missable",
     trigger = once(IsScreen(BOSS_HUNTSMAN)) &&
@@ -561,7 +561,7 @@ achievement(
 )
 
 achievement(
-    title = "Grandpa the master",
+    title = "With Grandpa the master",
     description = "Use Grandpa’s Jump In to defeat 5 enemies with his fireball attack",
     points = 5,
     trigger = once(GrandpaJumpInUsedDelta()) &&
