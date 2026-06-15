@@ -12,6 +12,7 @@ function VictoryPose() => byte(0x007674)
 function CameraLock() => byte(0x0074F0)
 function StageTimerLow() => word(0x0062B4)
 function StageTimerHigh() => word(0x0062B6)
+function EnemiesDespawned() => byte(0x0074C0)
 function DragonAttackLevel() => byte(0x007658)
 function DragonDrainLevel() => byte(0x00766c)
 function DragonChargeLevel() => byte(0x007670)
@@ -66,6 +67,11 @@ ON_SKATEBOARD_AIRBORNE = 3
 PAUSE_STATE_UNPAUSED = 0x00
 PAUSE_STATE_PAUSED = 0x01
 MAX_ABILITY_LEVEL = 0x03
+PRE_MAX_ABILITY_LEVEL = 0x02
+JAKE_ABILITY_MAX_TOTAL = 0x0F
+DRAGON_ABILITY_MAX_TOTAL = 0x0F
+ALL_ABILITY_MAX_TOTAL = 0x1E
+DRAGON_UP_ENEMY_TARGET = 30
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -110,6 +116,8 @@ function IsJumpInScreen() => IsScreen(SCREEN_JUMP_IN_CUTSCENE) || IsScreen(SCREE
 // PLAYER FORM HELPER
 function IsJakeForm() => PlayerForm() == FORM_JAKE
 function IsDragonForm() => PlayerForm() == FORM_DRAGON
+function EnteredDragonForm() => IsDragonForm() && prev(PlayerForm()) == FORM_JAKE
+function DragonTransformationEnded() => IsJakeForm() && prev(PlayerForm()) == FORM_DRAGON
 function IsVictoryPoseActive() => VictoryPose() == VICTORY_POSE_ACTIVE
 function WasVictoryPoseActive() => prev(VictoryPose()) == VICTORY_POSE_ACTIVE
 function IsInStage(stage) => IsScreen(stage)
@@ -181,6 +189,9 @@ function CloneTankDefeatedDelta() => any_of(CLONE_TANK_HP_ADDRESSES, address => 
 function HuntsclanClonesTimerRunning() => IsScreen(BOSS_HUNTSCLAN_CLONES) && IsUnpaused()
 function LeftHuntsclanClonesAttempt() => WasScreen(BOSS_HUNTSCLAN_CLONES) && ScreenId() != BOSS_HUNTSCLAN_CLONES && ScreenId() != SCREEN_JUMP_IN_CUTSCENE && ScreenId() != SCREEN_JUMP_IN_RETURN
 
+//ENEMY HELPER
+function EnemyDefeatedDelta() => EnemiesDespawned() > prev(EnemiesDespawned())
+
 //HUNTSMAN Helper
 HUNTSMAN_HP_ADDRESSES = [
     0x0423DC,
@@ -196,17 +207,21 @@ function HuntsmanHp(address) => byte(address)
 function HuntsmanFinalPhaseDefeatedDelta() => any_of(HUNTSMAN_HP_ADDRESSES, address => once(HuntsmanHp(address) == HUNTSMAN_FINAL_PHASE_HP) && HuntsmanHp(address) == HUNTSMAN_DEFEATED_HP && prev(HuntsmanHp(address)) == HUNTSMAN_LAST_HP)
 
 //ABILITY HELPER
-function DragonAttackLevelMaxedDelta() => DragonAttackLevel() == MAX_ABILITY_LEVEL && prev(DragonAttackLevel()) < MAX_ABILITY_LEVEL
-function DragonDrainLevelMaxedDelta() => DragonDrainLevel() == MAX_ABILITY_LEVEL && prev(DragonDrainLevel()) < MAX_ABILITY_LEVEL
-function DragonChargeLevelMaxedDelta() => DragonChargeLevel() == MAX_ABILITY_LEVEL && prev(DragonChargeLevel()) < MAX_ABILITY_LEVEL
-function DragonFireLevelMaxedDelta() => DragonFireLevel() == MAX_ABILITY_LEVEL && prev(DragonFireLevel()) < MAX_ABILITY_LEVEL
-function DragonSpeedLevelMaxedDelta() => DragonSpeedLevel() == MAX_ABILITY_LEVEL && prev(DragonSpeedLevel()) < MAX_ABILITY_LEVEL
+function DragonAttackLevelMaxedDelta() => DragonAttackLevel() == MAX_ABILITY_LEVEL && prev(DragonAttackLevel()) == PRE_MAX_ABILITY_LEVEL
+function DragonDrainLevelMaxedDelta() => DragonDrainLevel() == MAX_ABILITY_LEVEL && prev(DragonDrainLevel()) == PRE_MAX_ABILITY_LEVEL
+function DragonChargeLevelMaxedDelta() => DragonChargeLevel() == MAX_ABILITY_LEVEL && prev(DragonChargeLevel()) == PRE_MAX_ABILITY_LEVEL
+function DragonFireLevelMaxedDelta() => DragonFireLevel() == MAX_ABILITY_LEVEL && prev(DragonFireLevel()) == PRE_MAX_ABILITY_LEVEL
+function DragonSpeedLevelMaxedDelta() => DragonSpeedLevel() == MAX_ABILITY_LEVEL && prev(DragonSpeedLevel()) == PRE_MAX_ABILITY_LEVEL
 
-function JakeAttackLevelMaxedDelta() => JakeAttackLevel() == MAX_ABILITY_LEVEL && prev(JakeAttackLevel()) < MAX_ABILITY_LEVEL
-function JakeSkateLevelMaxedDelta() => JakeSkateLevel() == MAX_ABILITY_LEVEL && prev(JakeSkateLevel()) < MAX_ABILITY_LEVEL
-function JakeSpeedLevelMaxedDelta() => JakeSpeedLevel() == MAX_ABILITY_LEVEL && prev(JakeSpeedLevel()) < MAX_ABILITY_LEVEL
-function JakeHealthLevelMaxedDelta() => JakeHealthLevel() == MAX_ABILITY_LEVEL && prev(JakeHealthLevel()) < MAX_ABILITY_LEVEL
-function JakeFocusLevelMaxedDelta() => JakeFocusLevel() == MAX_ABILITY_LEVEL && prev(JakeFocusLevel()) < MAX_ABILITY_LEVEL
+function JakeAttackLevelMaxedDelta() => JakeAttackLevel() == MAX_ABILITY_LEVEL && prev(JakeAttackLevel()) == PRE_MAX_ABILITY_LEVEL
+function JakeSkateLevelMaxedDelta() => JakeSkateLevel() == MAX_ABILITY_LEVEL && prev(JakeSkateLevel()) == PRE_MAX_ABILITY_LEVEL
+function JakeSpeedLevelMaxedDelta() => JakeSpeedLevel() == MAX_ABILITY_LEVEL && prev(JakeSpeedLevel()) == PRE_MAX_ABILITY_LEVEL
+function JakeHealthLevelMaxedDelta() => JakeHealthLevel() == MAX_ABILITY_LEVEL && prev(JakeHealthLevel()) == PRE_MAX_ABILITY_LEVEL
+function JakeFocusLevelMaxedDelta() => JakeFocusLevel() == MAX_ABILITY_LEVEL && prev(JakeFocusLevel()) == PRE_MAX_ABILITY_LEVEL
+
+function DragonAbilityLevelTotal() => DragonAttackLevel() + DragonDrainLevel() + DragonChargeLevel() + DragonFireLevel() + DragonSpeedLevel()
+function JakeAbilityLevelTotal() => JakeAttackLevel() + JakeSkateLevel() + JakeSpeedLevel() + JakeHealthLevel() + JakeFocusLevel()
+function AllAbilityLevelTotal() => DragonAbilityLevelTotal() + JakeAbilityLevelTotal()
 
 
 
@@ -484,12 +499,23 @@ achievement(
               trigger_when(HuntsmanFinalPhaseDefeatedDelta())
 )
 
+// MISC ACHIEVEMENTS
+
+achievement(
+    title = "Dragon Up!",
+    description = "Enter Dragon Mode and defeat 30 enemies before the transformation ends",
+    points = 5,
+    trigger = once(EnteredDragonForm()) &&
+              never(DragonTransformationEnded()) &&
+              measured(repeated(DRAGON_UP_ENEMY_TARGET, IsDragonForm() && EnemyDefeatedDelta()))
+)
+
 //Ability Achievements
 
 achievement(
     title = "His skills are getting faster",
     description = "Max out any Ability for the first time",
-    points = 5,
+    points = 3,
     trigger = DragonAttackLevelMaxedDelta() ||
               DragonDrainLevelMaxedDelta() ||
               DragonChargeLevelMaxedDelta() ||
@@ -500,6 +526,47 @@ achievement(
               JakeSpeedLevelMaxedDelta() ||
               JakeHealthLevelMaxedDelta() ||
               JakeFocusLevelMaxedDelta()
+)
+
+achievement(
+    title = "Jake of all Trades",
+    description = "Max out all of Jake's Abilities",
+    points = 10,
+    trigger = (JakeAttackLevelMaxedDelta() ||
+               JakeSkateLevelMaxedDelta() ||
+               JakeSpeedLevelMaxedDelta() ||
+               JakeHealthLevelMaxedDelta() ||
+               JakeFocusLevelMaxedDelta()) &&
+              measured(JakeAbilityLevelTotal() == JAKE_ABILITY_MAX_TOTAL)
+)
+
+achievement(
+    title = "Dragon power, Dragon teeth, Dragon tail, burning Dragon fire",
+    description = "Max out all Dragon Abilities",
+    points = 10,
+    trigger = (DragonAttackLevelMaxedDelta() ||
+               DragonDrainLevelMaxedDelta() ||
+               DragonChargeLevelMaxedDelta() ||
+               DragonFireLevelMaxedDelta() ||
+               DragonSpeedLevelMaxedDelta()) &&
+              measured(DragonAbilityLevelTotal() == DRAGON_ABILITY_MAX_TOTAL)
+)
+
+achievement(
+    title = "He's the AMERICAN DRAGOON",
+    description = "Max out all Abilities",
+    points = 25,
+    trigger = (DragonAttackLevelMaxedDelta() ||
+               DragonDrainLevelMaxedDelta() ||
+               DragonChargeLevelMaxedDelta() ||
+               DragonFireLevelMaxedDelta() ||
+               DragonSpeedLevelMaxedDelta() ||
+               JakeAttackLevelMaxedDelta() ||
+               JakeSkateLevelMaxedDelta() ||
+               JakeSpeedLevelMaxedDelta() ||
+               JakeHealthLevelMaxedDelta() ||
+               JakeFocusLevelMaxedDelta()) &&
+              measured(AllAbilityLevelTotal() == ALL_ABILITY_MAX_TOTAL)
 )
 
 //RICH PRESENCE//
