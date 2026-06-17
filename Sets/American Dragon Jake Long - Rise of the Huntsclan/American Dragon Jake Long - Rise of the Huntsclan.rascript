@@ -574,7 +574,7 @@ achievement(
 )
 
 achievement(
-    title = "With Grandpa the master",
+    title = "With Grandpa the Master",
     description = "Use Grandpa’s Jump In to defeat 5 enemies with his fireball attack",
     points = 5,
     trigger = once(GrandpaJumpInUsedDelta()) &&
@@ -584,7 +584,7 @@ achievement(
 )
 
 achievement(
-    title = "He's cool, he's hot like a frozen sun",
+    title = "He's Cool, He's Hot Like a Frozen Sun",
     description = "Clear any non-boss stage without taking damage and without using Dragon Mode",
     points = 10,
     trigger = once(any_of(RegularStageIds, stage => IsScreen(stage))) &&
@@ -596,7 +596,7 @@ achievement(
 //Ability Achievements
 
 achievement(
-    title = "His skills are getting faster",
+    title = "His Skills Are Getting Faster",
     description = "Max out any Ability for the first time",
     points = 3,
     trigger = DragonAttackLevelMaxedDelta() ||
@@ -612,7 +612,7 @@ achievement(
 )
 
 achievement(
-    title = "Jake of all Trades",
+    title = "Jake of All Trades",
     description = "Max out all of Jake's Abilities",
     points = 10,
     trigger = (JakeAttackLevelMaxedDelta() ||
@@ -624,7 +624,7 @@ achievement(
 )
 
 achievement(
-    title = "Dragon power, Dragon teeth, Dragon tail, burning Dragon fire",
+    title = "Dragon Power, Dragon Teeth, Dragon Tail, Burning Dragon Fire",
     description = "Max out all Dragon Abilities",
     points = 10,
     trigger = (DragonAttackLevelMaxedDelta() ||
