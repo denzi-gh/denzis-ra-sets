@@ -566,7 +566,7 @@ achievement(
 // HUNTSMAN FINAL BOSS ACHIEVEMENTS
 
 achievement(
-    title = "Take that, Huntsfool!",
+    title = "Take That, Huntsfool!",
     description = "Defeat the Huntsman",
     points = 25,
     trigger = BossStageClearCandidate(BOSS_HUNTSMAN)
