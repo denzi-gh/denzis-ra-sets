@@ -553,7 +553,7 @@ achievement(
 
 achievement(
     title = "Clone Control",
-    description = "Defeat 150 Huntsclan Clones before destroying the tank without getting hit more than three times.",
+    description = "Defeat 150 Huntsclan Clones before destroying the tank without getting hit more than three times",
     points = 25,
     type = "missable",
     trigger = never(LeftHuntsclanClonesAttempt()) &&
