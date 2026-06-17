@@ -67,8 +67,12 @@ BOSS_HUNTSMAN = 0x32
 FORM_JAKE = 0
 FORM_DRAGON = 1
 VICTORY_POSE_ACTIVE = 2
+JAKE_ACTION_JUMPING = 0
+JAKE_ACTION_ON_FEET = 1
 ON_SKATEBOARD = 2
 ON_SKATEBOARD_AIRBORNE = 3
+CAMERA_UNLOCKED = 0
+CAMERA_LOCKED = 1
 PAUSE_STATE_UNPAUSED = 0x00
 PAUSE_STATE_PAUSED = 0x01
 JUMP_IN_AVAILABLE = 0x01
@@ -146,7 +150,14 @@ function JakeIsFullHealth() => JakeHealth() == JAKE_FULL_HEALTH
 function TookDamage() => JakeHealth() < JAKE_FULL_HEALTH
 function TookDamageDelta() => JakeHealth() < prev(JakeHealth())
 function HealedToFullHealthDelta() => JakeIsFullHealth() && prev(JakeHealth()) < JAKE_FULL_HEALTH
+function IsJumping() => isOnSkateboard() == JAKE_ACTION_JUMPING
+function StartedJumping() => isOnSkateboard() == JAKE_ACTION_JUMPING && prev(isOnSkateboard()) != JAKE_ACTION_JUMPING
+function IsOnFeet() => isOnSkateboard() == JAKE_ACTION_ON_FEET
+function IsSkateboardAirborne() => isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
+function StartedSkateboardAirborne() => isOnSkateboard() == ON_SKATEBOARD_AIRBORNE && prev(isOnSkateboard()) != ON_SKATEBOARD_AIRBORNE
 function IsSkateboarding() => isOnSkateboard() == ON_SKATEBOARD || isOnSkateboard() == ON_SKATEBOARD_AIRBORNE
+function IsCameraUnlocked() => CameraLock() == CAMERA_UNLOCKED
+function IsCameraLocked() => CameraLock() == CAMERA_LOCKED
 function IsPaused() => PauseState() == PAUSE_STATE_PAUSED
 function IsUnpaused() => PauseState() == PAUSE_STATE_UNPAUSED
 
@@ -382,6 +393,22 @@ achievement(
     description = "Clear Stage 3-3 past the helicopter pursuit",
     points = 5,
     trigger = StageClearCandidate(STAGE_3_3)
+)
+
+achievement(
+    title = "Grounded at Altitude",
+    description = "Clear Stage 3-3 without Dragon Mode and without ever Jumping",
+    points = 10,
+    type = "missable",
+    trigger = never(IsScreen(STAGE_3_3) && IsCameraLocked()) &&
+              once(IsScreen(STAGE_3_3) && IsCameraUnlocked() && IsOnFeet()) &&
+              disable_when(IsScreen(STAGE_3_3) && IsCameraUnlocked() && IsDragonForm(),
+                           IsScreen(STAGE_3_3) && IsCameraLocked()) &&
+              disable_when(IsScreen(STAGE_3_3) && IsCameraUnlocked() && StartedJumping(),
+                           IsScreen(STAGE_3_3) && IsCameraLocked()) &&
+              disable_when(IsScreen(STAGE_3_3) && IsCameraUnlocked() && StartedSkateboardAirborne(),
+                           IsScreen(STAGE_3_3) && IsCameraLocked()) &&
+              trigger_when(StageClearCandidate(STAGE_3_3))
 )
 
 achievement(
