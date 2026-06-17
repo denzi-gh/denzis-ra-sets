@@ -88,6 +88,7 @@ DRAGON_UP_ENEMY_TARGET = 30
 GOOD_BOY_FU_DOG_ENEMY_TARGET = 15
 CHEESEBURGER_COMEBACK_WAVE_TARGET = 3
 GRANDPA_MASTER_ENEMY_TARGET = 2
+HUNTSCLAN_CLONES_OVERFLOW_TARGET = 150
 
 RegularStageIds = [
     STAGE_1_1, STAGE_1_2, STAGE_1_3,
@@ -547,6 +548,17 @@ achievement(
               once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
               disable_when(IsJumpInScreen(), LeftHuntsclanClonesAttempt()) &&
               disable_when(repeated(HUNTSCLAN_CLONES_TIME_LIMIT, HuntsclanClonesTimerRunning()), LeftHuntsclanClonesAttempt()) &&
+              trigger_when(CloneTankDefeatedDelta())
+)
+
+achievement(
+    title = "Clone Control",
+    description = "Defeat 150 Huntsclan Clones before destroying the tank without getting hit more than three times.",
+    points = 25,
+    type = "missable",
+    trigger = once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
+              disable_when(repeated(4, IsScreen(BOSS_HUNTSCLAN_CLONES) && TookDamageDelta()), LeftHuntsclanClonesAttempt()) &&
+              measured(EnemiesDespawned() >= HUNTSCLAN_CLONES_OVERFLOW_TARGET) &&
               trigger_when(CloneTankDefeatedDelta())
 )
 
