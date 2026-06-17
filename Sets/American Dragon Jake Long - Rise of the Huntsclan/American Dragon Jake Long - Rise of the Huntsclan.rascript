@@ -316,7 +316,7 @@ achievement(
 achievement(
     title = "Love at First Fight",
     description = "Defeat the Huntsgirl without Jump Ins and without taking damage",
-    points = 25,
+    points = 10,
     type = "missable",
     trigger = once(IsScreen(BOSS_HUNTSGIRL)) &&
               once(HuntsgirlFullHP()) &&
@@ -362,7 +362,7 @@ achievement(
 achievement(
     title = "No Board, No Bites",
     description = "Defeat the Giant Spider without Jump Ins, without using the skateboard and without taking damage",
-    points = 25,
+    points = 10,
     type = "missable",
     trigger = once(IsScreen(BOSS_GIANT_SPIDER)) &&
               once(GiantSpiderFullHP()) &&
@@ -427,7 +427,7 @@ CYCLOPS_TIME_LIMIT = 2 * 60 * 60 //(2 minutes in frames)
 achievement(
     title = "MY EYE!!!",
     description = "Defeat the Cyclops in under 2 Minutes, without using Jump Ins and without taking damage",
-    points = 25,
+    points = 10,
     type = "missable",
     trigger = once(IsScreen(BOSS_CYCLOPS)) &&
               never(TookDamage()) &&
@@ -472,7 +472,7 @@ achievement(
 achievement(
     title = "Dragon vs. Snake",
     description = "Defeat Giant Medusa while in Dragon Form, without Jump Ins and without taking damage",
-    points = 25,
+    points = 10,
     type = "missable",
     trigger = once(IsScreen(BOSS_MEDUSA)) &&
               once(GiantMedusaFullHP()) &&
@@ -517,7 +517,7 @@ achievement(
 achievement(
     title = "Grounded Rematch",
     description = "Defeat the Huntsgirl rematch without Jump Ins, without using the skateboard and without taking damage",
-    points = 25,
+    points = 10,
     type = "missable",
     trigger = once(IsScreen(BOSS_HUNTSGIRL_REMATCH)) &&
               once(HuntsgirlRematchFullHP()) &&
@@ -568,14 +568,14 @@ achievement(
 achievement(
     title = "Take That, Huntsfool!",
     description = "Defeat the Huntsman",
-    points = 25,
+    points = 10,
     trigger = BossStageClearCandidate(BOSS_HUNTSMAN)
 )
 
 achievement(
     title = "Huntsman, More Like HuntsCAN'T",
     description = "Defeat the Huntsman without using Jump Ins and without taking damage",
-    points = 50,
+    points = 25,
     type = "missable",
     trigger = once(IsScreen(BOSS_HUNTSMAN)) &&
               never(TookDamage()) &&
@@ -683,7 +683,7 @@ achievement(
 achievement(
     title = "He's the AMERICAN DRAGOON",
     description = "Max out all Abilities",
-    points = 25,
+    points = 10,
     trigger = (DragonAttackLevelMaxedDelta() ||
                DragonDrainLevelMaxedDelta() ||
                DragonChargeLevelMaxedDelta() ||
