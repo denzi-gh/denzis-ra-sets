@@ -185,13 +185,23 @@ function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaH
 function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
 function AnyRegularStageClearCandidate() => any_of(RegularStageIds, stage => StageClearCandidate(stage))
 function LeftJumpInReturn() => WasScreen(SCREEN_JUMP_IN_RETURN) && ScreenId() != SCREEN_JUMP_IN_RETURN
-function BossStageClearCandidate(stage) => once(IsScreen(stage)) &&
+function LeftBossAttempt(stage) => WasScreen(stage) &&
+                                   ScreenId() != stage &&
+                                   ScreenId() != SCREEN_JUMP_IN_CUTSCENE &&
+                                   ScreenId() != SCREEN_JUMP_IN_RETURN
+function LeftBossAttemptWithoutClear(stage) => LeftBossAttempt(stage) &&
+                                               !IsVictoryPoseActive() &&
+                                               !WasVictoryPoseActive()
+function BossStageClearHitReset(stage) => EnteredScreen(stage) ||
+                                          LeftBossAttemptWithoutClear(stage)
+function BossStageClearCandidate(stage) => never(BossStageClearHitReset(stage)) &&
+                                           once(IsScreen(stage)) &&
                                            (LeftStage(stage) || LeftJumpInReturn()) &&
                                            (IsVictoryPoseActive() || WasVictoryPoseActive())
 
 // TIMER HELPER
 function StageTimer() => StageTimerHigh() * 65536 + StageTimerLow()
-function BossLeaderboardStart(stage) => EnteredScreen(stage)
+function BossLeaderboardStart(stage) => EnteredScreen(stage) && IsUnpaused()
 function BossLeaderboardCancel(stage) => IsJumpInScreen() || !IsScreen(stage)
 function BossLeaderboardTimerRunning() => IsUnpaused()
 
@@ -212,7 +222,7 @@ CLONE_TANK_DEFEATED = 0xFF
 function CloneTankHp(address) => byte(address)
 function CloneTankDefeatedDelta() => any_of(CLONE_TANK_HP_ADDRESSES, address => IsScreen(BOSS_HUNTSCLAN_CLONES) && CloneTankHp(address) == CLONE_TANK_DEFEATED && prev(CloneTankHp(address)) == CLONE_TANK_EMPTY_HP)
 function HuntsclanClonesTimerRunning() => IsScreen(BOSS_HUNTSCLAN_CLONES) && IsUnpaused()
-function LeftHuntsclanClonesAttempt() => WasScreen(BOSS_HUNTSCLAN_CLONES) && ScreenId() != BOSS_HUNTSCLAN_CLONES && ScreenId() != SCREEN_JUMP_IN_CUTSCENE && ScreenId() != SCREEN_JUMP_IN_RETURN
+function LeftHuntsclanClonesAttempt() => LeftBossAttempt(BOSS_HUNTSCLAN_CLONES)
 
 //ENEMY HELPER
 function EnemyDefeatedDelta() => EnemiesDespawned() > prev(EnemiesDespawned())
@@ -327,7 +337,8 @@ achievement(
     description = "Defeat the Giant Spider and complete World 2",
     points = 10,
     type = "progression",
-    trigger = once(GiantSpiderDefeatedDelta()) &&
+    trigger = never(BossStageClearHitReset(BOSS_GIANT_SPIDER)) &&
+              once(GiantSpiderDefeatedDelta()) &&
               BossStageClearCandidate(BOSS_GIANT_SPIDER)
 )
 
@@ -373,7 +384,8 @@ achievement(
     description = "Defeat the Cyclops and complete World 3",
     points = 10,
     type = "progression",
-    trigger = once(CyclopsDefeatedDelta()) &&
+    trigger = never(BossStageClearHitReset(BOSS_CYCLOPS)) &&
+              once(CyclopsDefeatedDelta()) &&
               BossStageClearCandidate(BOSS_CYCLOPS)
 )
 
@@ -387,7 +399,7 @@ achievement(
     trigger = once(IsScreen(BOSS_CYCLOPS)) &&
               never(TookDamage()) &&
               never(IsJumpInScreen()) &&
-              disable_when(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning())) &&
+              disable_when(repeated(CYCLOPS_TIME_LIMIT, CyclopsTimerRunning()), !IsScreen(BOSS_CYCLOPS)) &&
               trigger_when(CyclopsDefeatedDelta())
 )
 
@@ -499,7 +511,8 @@ achievement(
     description = "Defeat the Huntsclan Clones in under 5(WIP) minutes without using Jump-Ins",
     points = 25,
     type = "missable",
-    trigger = once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
+    trigger = never(EnteredScreen(BOSS_HUNTSCLAN_CLONES) || LeftBossAttempt(BOSS_HUNTSCLAN_CLONES)) &&
+              once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
               disable_when(IsJumpInScreen(), LeftHuntsclanClonesAttempt()) &&
               disable_when(repeated(HUNTSCLAN_CLONES_TIME_LIMIT, HuntsclanClonesTimerRunning()), LeftHuntsclanClonesAttempt()) &&
               trigger_when(CloneTankDefeatedDelta())
@@ -646,7 +659,7 @@ leaderboard(
     description = "Defeat the Huntsgirl as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_HUNTSGIRL),
     cancel = BossLeaderboardCancel(BOSS_HUNTSGIRL),
-    submit = HuntsgirlDefeatedDelta(),
+    submit = IsScreen(BOSS_HUNTSGIRL) && HuntsgirlDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -657,7 +670,7 @@ leaderboard(
     description = "Defeat the Giant Spider as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_GIANT_SPIDER),
     cancel = BossLeaderboardCancel(BOSS_GIANT_SPIDER),
-    submit = GiantSpiderDefeatedDelta(),
+    submit = IsScreen(BOSS_GIANT_SPIDER) && GiantSpiderDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -668,7 +681,7 @@ leaderboard(
     description = "Defeat the Cyclops as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_CYCLOPS),
     cancel = BossLeaderboardCancel(BOSS_CYCLOPS),
-    submit = CyclopsDefeatedDelta(),
+    submit = IsScreen(BOSS_CYCLOPS) && CyclopsDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -679,7 +692,7 @@ leaderboard(
     description = "Defeat the Giant Medusa as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_MEDUSA),
     cancel = BossLeaderboardCancel(BOSS_MEDUSA),
-    submit = GiantMedusaDefeatedDelta(),
+    submit = IsScreen(BOSS_MEDUSA) && GiantMedusaDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -690,7 +703,7 @@ leaderboard(
     description = "Defeat the Huntsgirl again as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_HUNTSGIRL_REMATCH),
     cancel = BossLeaderboardCancel(BOSS_HUNTSGIRL_REMATCH),
-    submit = HuntsgirlDefeatedDelta(),
+    submit = IsScreen(BOSS_HUNTSGIRL_REMATCH) && HuntsgirlDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -701,7 +714,7 @@ leaderboard(
     description = "Defeat the Huntsman Clones as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_HUNTSCLAN_CLONES),
     cancel = BossLeaderboardCancel(BOSS_HUNTSCLAN_CLONES),
-    submit = CloneTankDefeatedDelta(),
+    submit = IsScreen(BOSS_HUNTSCLAN_CLONES) && CloneTankDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
@@ -712,7 +725,7 @@ leaderboard(
     description = "Defeat the Huntsman as fast as possible without using Jump-ins",
     start = BossLeaderboardStart(BOSS_HUNTSMAN),
     cancel = BossLeaderboardCancel(BOSS_HUNTSMAN),
-    submit = HuntsmanFinalPhaseDefeatedDelta(),
+    submit = IsScreen(BOSS_HUNTSMAN) && HuntsmanFinalPhaseDefeatedDelta(),
     value = measured(repeated(0, BossLeaderboardTimerRunning())),
     format = "FRAMES",
     lower_is_better = true
