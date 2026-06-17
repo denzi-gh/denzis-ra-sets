@@ -241,7 +241,12 @@ HUNTSMAN_DEFEATED_HP = 0x00
 
 function HuntsmanHp(address) => byte(address)
 //Huntsman has four Phases and regenerates Health in that Order: 3, 3, 6, 8 - HP must be 0x08 once (that detects if the Final Phase is reached)
-function HuntsmanFinalPhaseDefeatedDelta() => any_of(HUNTSMAN_HP_ADDRESSES, address => once(HuntsmanHp(address) == HUNTSMAN_FINAL_PHASE_HP) && HuntsmanHp(address) == HUNTSMAN_DEFEATED_HP && prev(HuntsmanHp(address)) == HUNTSMAN_LAST_HP)
+function HuntsmanFinalPhaseDefeatedDelta() => any_of(HUNTSMAN_HP_ADDRESSES, address =>
+    never(!IsScreen(BOSS_HUNTSMAN)) &&
+    once(HuntsmanHp(address) == HUNTSMAN_FINAL_PHASE_HP) &&
+    HuntsmanHp(address) == HUNTSMAN_DEFEATED_HP &&
+    prev(HuntsmanHp(address)) == HUNTSMAN_LAST_HP
+)
 
 //ABILITY HELPER
 function DragonAttackLevelMaxedDelta() => DragonAttackLevel() == MAX_ABILITY_LEVEL && prev(DragonAttackLevel()) == PRE_MAX_ABILITY_LEVEL
