@@ -87,7 +87,7 @@ ALL_ABILITY_MAX_TOTAL = 0x1E
 DRAGON_UP_ENEMY_TARGET = 30
 GOOD_BOY_FU_DOG_ENEMY_TARGET = 15
 CHEESEBURGER_COMEBACK_WAVE_TARGET = 3
-GRANDPA_MASTER_ENEMY_TARGET = 2
+GRANDPA_MASTER_ENEMY_TARGET = 5
 HUNTSCLAN_CLONES_OVERFLOW_TARGET = 150
 
 RegularStageIds = [
@@ -193,8 +193,14 @@ function GiantMedusaHp() => byte(0x041dca)
 function GiantMedusaDefeatedDelta() => GiantMedusaHp() == 0 && prev(GiantMedusaHp()) > 0
 
 
-// Checks if the player has left a Stage and the Victory Pose is active during it
-function StageClearCandidate(stage) => LeftStage(stage) && IsVictoryPoseActive()
+function LeftStageContext(stage) => (WasScreen(stage) || WasScreen(SCREEN_JUMP_IN_RETURN)) &&
+                                    ScreenId() != stage &&
+                                    ScreenId() != SCREEN_JUMP_IN_RETURN
+// Checks for a Stage clear. The original stage id must have been seen at least once, then the
+// clear pops on leaving the stage context with the Victory Pose active. (ScreenID changes to 0xcb on using Jump In)
+function StageClearCandidate(stage) => once(IsScreen(stage)) &&
+                                       LeftStageContext(stage) &&
+                                       IsVictoryPoseActive()
 function AnyRegularStageClearCandidate() => any_of(RegularStageIds, stage => StageClearCandidate(stage))
 function LeftJumpInReturn() => WasScreen(SCREEN_JUMP_IN_RETURN) && ScreenId() != SCREEN_JUMP_IN_RETURN
 function LeftBossAttempt(stage) => WasScreen(stage) &&
