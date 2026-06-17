@@ -556,9 +556,10 @@ achievement(
     description = "Defeat 150 Huntsclan Clones before destroying the tank without getting hit more than three times.",
     points = 25,
     type = "missable",
-    trigger = once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
+    trigger = never(LeftHuntsclanClonesAttempt()) &&
+              once(IsScreen(BOSS_HUNTSCLAN_CLONES)) &&
               disable_when(repeated(4, IsScreen(BOSS_HUNTSCLAN_CLONES) && TookDamageDelta()), LeftHuntsclanClonesAttempt()) &&
-              measured(EnemiesDespawned() >= HUNTSCLAN_CLONES_OVERFLOW_TARGET) &&
+              measured(repeated(HUNTSCLAN_CLONES_OVERFLOW_TARGET, IsScreen(BOSS_HUNTSCLAN_CLONES) && EnemyDefeatedDelta())) &&
               trigger_when(CloneTankDefeatedDelta())
 )
 
