@@ -198,7 +198,9 @@ function LeftStageContext(stage) => (WasScreen(stage) || WasScreen(SCREEN_JUMP_I
                                     ScreenId() != SCREEN_JUMP_IN_RETURN
 // Checks for a Stage clear. The original stage id must have been seen at least once, then the
 // clear pops on leaving the stage context with the Victory Pose active. (ScreenID changes to 0xcb on using Jump In)
-function StageClearCandidate(stage) => once(IsScreen(stage)) &&
+function StageClearHitReset(stage) => EnteredScreen(stage)
+function StageClearCandidate(stage) => never(StageClearHitReset(stage)) &&
+                                       once(IsScreen(stage)) &&
                                        LeftStageContext(stage) &&
                                        IsVictoryPoseActive()
 function AnyRegularStageClearCandidate() => any_of(RegularStageIds, stage => StageClearCandidate(stage))
